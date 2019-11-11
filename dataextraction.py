@@ -17,7 +17,7 @@ ds = CDS_Dataset(dataset_name='reanalysis-era5-pressure-levels',
                  save_to_folder='./data/'  # path to where datasets shall be stored
                 )
 
-# define areas of interest
+# define areas of interest (N/W/S/E)
 area_dict = dict(danube=[50, 7, 47, 20],
                  asia=[55, -140, 0, 35],
                  usa=[50, -125, 25, -70])
@@ -40,3 +40,4 @@ ds.get(years = [str(y) for y in range(year_start, year_end+1)],
        months = [str(a).zfill(2) for a in range(month_start, month_end+1)],
        request = request,
        N_parallel_requests = 12)
+
