@@ -14,7 +14,7 @@ sys.path.append('./')
 from functions.data_download import CDS_Dataset
 
 ds = CDS_Dataset(dataset_name='reanalysis-era5-pressure-levels',
-                 save_to_folder='./data/'  # path to where datasets shall be stored
+                 save_to_folder='../data/'  # path to where datasets shall be stored
                 )
 
 # define areas of interest (N/W/S/E)
@@ -32,7 +32,7 @@ month_end = 1
 request = dict(product_type='reanalysis',
                format='netcdf',
                area=area_dict['usa'],
-               variable=['lsp'],
+               variable=['temperature'],
                pressure_level=['850', '700', '500'])
 
 #Sending the request
