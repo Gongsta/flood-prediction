@@ -26,13 +26,13 @@ area_dict = dict(danube=[50, 7, 47, 20],
 year_start = 2000
 year_end = 2000
 month_start = 1
-month_end = 12
+month_end = 1
 
 # define requested variables
 request = dict(product_type='reanalysis',
                format='netcdf',
                area=area_dict['usa'],
-               variable=['geopotential', 'temperature', 'specific_humidity'],
+               variable=['lsp'],
                pressure_level=['850', '700', '500'])
 
 #Sending the request
@@ -40,4 +40,5 @@ ds.get(years = [str(y) for y in range(year_start, year_end+1)],
        months = [str(a).zfill(2) for a in range(month_start, month_end+1)],
        request = request,
        N_parallel_requests = 12)
+
 
