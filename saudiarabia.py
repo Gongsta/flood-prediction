@@ -46,8 +46,14 @@ ds.get(years = [str(y) for y in range(year_start, year_end+1)],
        request = request,
        N_parallel_requests = 12)
 
-ds.get(years = ['2008'],
-       months = ['5'],
+#Temporary
+ds.get(years = ['2009'],
+       months = ['1','4','6','7','8','9','10','11'],
+       request = request,
+       N_parallel_requests = 12)
+
+ds.get(years = ['2010'],
+       months = ['1','2'],
        request = request,
        N_parallel_requests = 12)
 
@@ -97,6 +103,7 @@ c.retrieve(
 import xarray as xr
 
 #Data Preprocessing
+'''
 glofas = xr.open_dataset('../data/dataset-cems-glofas-historical-fc9c62e9-1df3-4179-84dd-277f77e620fb/CEMS_ECMWF_dis24_20010101_glofas_v2.1.nc')
 
 #Putting all of glofas files into a single file
@@ -125,10 +132,63 @@ for n in range(5,11):
 
 era5.to_netcdf(path="../data/2005-2010-era5.nc")
 
-
 glofas = xr.open_dataset("../data/glofas2001.nc")
+'''
+
+
+
+#The open_mfdataset function automatically combines the many .nc files, the * represents the value that varies
+era5 = xr.open_mfdataset('../data/reanalysis-era5-single-levels_convective_precipitation,land_sea_mask,large_scale_precipitation,runoff,slope_of_sub_gridscale_orography,soil_type,total_column_water_vapour,volumetric_soil_water_layer_1,volumetric_soil_water_layer_2_*_*.nc', combine='by_coords')
+
+glofas = xr.open_mfdataset('../data/dataset-cems-glofas-historical-fc9c62e9-1df3-4179-84dd-277f77e620fb/CEMS_ECMWF_dis24_*_glofas_v2.1.nc', combine='by_coords')
+
+
+
+from functions.utils_floodmodel import get_mask_of_basin, add_shifted_variables, reshape_scalar_predictand
+
+'''
+#Get mask of basin Return a mask where all points outside the selected basin are False.
+danube_catchment = get_mask_of_basin(glofas['dis24'].isel(time=0))
+dis = glofas['dis'].where(danube_catchment)
+'''
+
+#Taking the average latitude and longitude
+era5 = era5.mean(['longitude','latitude'])
+glofas = glofas.mean(['lon','lat'])
+
+#Visualizing the features
+#Converting to a dataarray
+era5visualization = era5.to_array(dim='features').T
+glofasvisualization = glofas.to_array(dim='features').T
+
+import matplotlib.pyplot as plt
+for f in era5visualization.features:
+    plt.figure(figsize=(15,5))
+    era5visualization.sel(features=f).plot(ax=plt.gca())
+
+for f in glofasvisualization.features:
+    plt.figure(figsize=(15,5))
+    glofasvisualization.sel(features=f).plot(ax=plt.gca())
+
+
+sample_data = xr.merge([glofas, era5])
+
+
 
 
 
 #Creating the model
+import numpy as np
+import datetime as dt
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+import dask
+from dask.distributed import Client, LocalCluster
+cluster = LocalCluster(processes=True) #n_workers=10, threads_per_worker=1,
+client = Client(cluster)  # memory_limit='16GB',
+
+import xarray as xr
+from dask.diagnostics import ProgressBar
 
