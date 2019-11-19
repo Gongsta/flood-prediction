@@ -69,8 +69,7 @@ c.retrieve(
     {
         'format':'zip',
         'year':[
-            '2005','2006','2007',
-            '2008'
+            '2005'
         ],
         'variable':'River discharge',
         'month':[
@@ -165,13 +164,16 @@ import matplotlib.pyplot as plt
 for f in era5visualization.features:
     plt.figure(figsize=(15,5))
     era5visualization.sel(features=f).plot(ax=plt.gca())
+    #plt.savefig('era5visualization.png', dpi=600, bbox_inches='tight')
+
 
 for f in glofasvisualization.features:
     plt.figure(figsize=(15,5))
     glofasvisualization.sel(features=f).plot(ax=plt.gca())
 
+    #plt.savefig('glofasvisualization.png', dpi=600, bbox_inches='tight')
 
-sample_data = xr.merge([glofas, era5])
+#sample_data = xr.merge([glofas, era5])
 
 
 
@@ -192,3 +194,58 @@ client = Client(cluster)  # memory_limit='16GB',
 import xarray as xr
 from dask.diagnostics import ProgressBar
 
+
+y = glofas['dis24']
+X = era5.to_array()
+
+from functions.utils_floodmodel import reshape_scalar_predictand
+X, y = reshape_scalar_predictand(X, y)
+X.features
+
+#Splitting the dataset into training, test, and validation
+
+period_train = dict(time=slice(None, '2005'))
+period_valid = dict(time=slice('2006', '2009'))
+period_test = dict(time=slice('2009', '2010'))
+
+X_train, y_train = X.loc[period_train], y.loc[period_train]
+X_valid, y_valid = X.loc[period_valid], y.loc[period_valid]
+X_test, y_test = X.loc[period_test], y.loc[period_test]
+
+
+#Visualizing the distribution of discharge
+import seaborn as sns
+sns.distplot(y)
+plt.ylabel('density')
+plt.xlim([-100, 2250])
+plt.title('distribution of discharge')
+plt.plot()
+#lt.savefig('distribution_dis.png', dpi=600, bbox_inches='tight')
+
+
+import sys
+sys.path.append("../../")
+print(sys.executable)
+import numpy as np
+import datetime as dt
+import pandas as pd
+import matplotlib.pyplot as plt
+import dask
+dask.config.set(scheduler='threads')
+import xarray as xr
+
+import joblib
+from sklearn.pipeline import Pipeline
+from dask_ml.preprocessing import StandardScaler
+from dask_ml.decomposition import PCA
+
+from sklearn.linear_model import LinearRegression
+
+matplotlib.rcParams.update({'font.size': 14})
+
+
+model = LinearRegression(n_jobs=-1)
+
+pipe = Pipeline([('scaler', StandardScaler()),
+                 #('pca', PCA(n_components=6)),
+                 ('model', model),], verbose=True)
