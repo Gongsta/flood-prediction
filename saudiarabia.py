@@ -46,17 +46,6 @@ ds.get(years = [str(y) for y in range(year_start, year_end+1)],
        request = request,
        N_parallel_requests = 12)
 
-#Temporary
-ds.get(years = ['2009'],
-       months = ['1','4','6','7','8','9','10','11'],
-       request = request,
-       N_parallel_requests = 12)
-
-ds.get(years = ['2010'],
-       months = ['1','2'],
-       request = request,
-       N_parallel_requests = 12)
-
 
 
 #Code for downloading Glofas Data
@@ -69,7 +58,7 @@ c.retrieve(
     {
         'format':'zip',
         'year':[
-            '2005'
+            '2010'
         ],
         'variable':'River discharge',
         'month':[
@@ -91,7 +80,6 @@ c.retrieve(
             '28','29','30',
             '31'
         ],
-        'area': ['28','36','17','50'],
         'dataset':'Consolidated reanalysis',
         'version':'2.1'
     },
@@ -135,11 +123,11 @@ glofas = xr.open_dataset("../data/glofas2001.nc")
 '''
 
 
-
+import xarray as xr
 #The open_mfdataset function automatically combines the many .nc files, the * represents the value that varies
 era5 = xr.open_mfdataset('../data/reanalysis-era5-single-levels_convective_precipitation,land_sea_mask,large_scale_precipitation,runoff,slope_of_sub_gridscale_orography,soil_type,total_column_water_vapour,volumetric_soil_water_layer_1,volumetric_soil_water_layer_2_*_*.nc', combine='by_coords')
 
-glofas = xr.open_mfdataset('../data/dataset-cems-glofas-historical-fc9c62e9-1df3-4179-84dd-277f77e620fb/CEMS_ECMWF_dis24_*_glofas_v2.1.nc', combine='by_coords')
+glofas = xr.open_mfdataset('../data/dataset-cems-glofas-historical-71364301-8a8a-4098-bca6-896e0e38e92f/CEMS_ECMWF_dis24_*_glofas_v2.1.nc', combine='by_coords')
 
 
 
@@ -177,8 +165,6 @@ for f in glofasvisualization.features:
 
 
 
-
-
 #Creating the model
 import numpy as np
 import datetime as dt
@@ -196,7 +182,7 @@ from dask.diagnostics import ProgressBar
 
 
 y = glofas['dis24']
-X = era5.to_array()
+X = era5
 
 from functions.utils_floodmodel import reshape_scalar_predictand
 X, y = reshape_scalar_predictand(X, y)
@@ -217,35 +203,134 @@ X_test, y_test = X.loc[period_test], y.loc[period_test]
 import seaborn as sns
 sns.distplot(y)
 plt.ylabel('density')
-plt.xlim([-100, 2250])
+plt.xlim([-100, 400])
 plt.title('distribution of discharge')
 plt.plot()
 #lt.savefig('distribution_dis.png', dpi=600, bbox_inches='tight')
 
 
-import sys
-sys.path.append("../../")
-print(sys.executable)
-import numpy as np
-import datetime as dt
-import pandas as pd
-import matplotlib.pyplot as plt
-import dask
-dask.config.set(scheduler='threads')
-import xarray as xr
-
-import joblib
 from sklearn.pipeline import Pipeline
-from dask_ml.preprocessing import StandardScaler
-from dask_ml.decomposition import PCA
-
-from sklearn.linear_model import LinearRegression
-
-matplotlib.rcParams.update({'font.size': 14})
+from sklearn.preprocessing import StandardScaler
+import keras
+from keras.layers.core import Dropout
+from keras.constraints import MinMaxNorm, nonneg
 
 
-model = LinearRegression(n_jobs=-1)
+def add_time(vector, time, name=None):
+    """Converts numpy arrays to xarrays with a time coordinate.
 
-pipe = Pipeline([('scaler', StandardScaler()),
-                 #('pca', PCA(n_components=6)),
-                 ('model', model),], verbose=True)
+    Parameters
+    ----------
+    vector : np.array
+        1-dimensional array of predictions
+    time : xr.DataArray
+        the return value of `Xda.time`
+
+    Returns
+    -------
+    xr.DataArray
+    """
+    return xr.DataArray(vector, dims=('time'), coords={'time': time}, name=name)
+
+
+class DenseNN(object):
+    def __init__(self, **kwargs):
+        self.xscaler = StandardScaler()
+        self.yscaler = StandardScaler()
+
+        model = keras.models.Sequential()
+        self.cfg = kwargs
+        hidden_nodes = self.cfg.get('hidden_nodes')
+
+        model.add(keras.layers.Dense(hidden_nodes[0],
+                                     activation='tanh'))
+        model.add(keras.layers.BatchNormalization())
+        model.add(Dropout(self.cfg.get('dropout', None)))
+
+        for n in hidden_nodes[1:]:
+            model.add(keras.layers.Dense(n, activation='tanh'))
+            model.add(keras.layers.BatchNormalization())
+            model.add(Dropout(self.cfg.get('dropout', None)))
+        model.add(keras.layers.Dense(self.output_dim,
+                                     activation='linear'))
+        opt = keras.optimizers.Adam()
+
+        model.compile(loss=self.cfg.get('loss'), optimizer=opt)
+        self.model = model
+
+        self.callbacks = [keras.callbacks.EarlyStopping(monitor='val_loss',
+                                                        min_delta=1e-2, patience=100, verbose=0, mode='auto',
+                                                        baseline=None, restore_best_weights=True), ]
+
+    def score_func(self, X, y):
+        """Calculate the RMS error
+
+        Parameters
+        ----------
+        xr.DataArrays
+        """
+        ypred = self.predict(X)
+        err_pred = ypred - y
+
+        # NaNs do not contribute to error
+        err_pred = err_pred.where(~np.isnan(err_pred), 0.)
+        return float(np.sqrt(xr.dot(err_pred, err_pred)))
+
+    def predict(self, Xda, name=None):
+        """Input and Output: xr.DataArray
+
+        Parameters
+        ----------
+        Xda : xr.DataArray
+            with coordinates (time,)
+        """
+        X = self.xscaler.transform(Xda.values)
+        y = self.model.predict(X).squeeze()
+        y = self.yscaler.inverse_transform(y)
+
+        y = add_time(y, Xda.time, name=name)
+        return y
+
+    def fit(self, X_train, y_train, X_valid, y_valid, **kwargs):
+        """
+        Input: xr.DataArray
+        Output: None
+        """
+
+        print(X_train.shape)
+        X_train = self.xscaler.fit_transform(X_train.values)
+        y_train = self.yscaler.fit_transform(
+            y_train.values.reshape(-1, self.output_dim))
+
+        X_valid = self.xscaler.transform(X_valid.values)
+        y_valid = self.yscaler.transform(
+            y_valid.values.reshape(-1, self.output_dim))
+
+        return self.model.fit(X_train, y_train,
+                              validation_data=(X_valid, y_valid),
+                              epochs=self.cfg.get('epochs', 1000),
+                              batch_size=self.cfg.get('batch_size'),
+                              callbacks=self.callbacks,
+                              verbose=0, **kwargs)
+
+    config = dict(hidden_nodes=(64,),
+                  dropout=0.25,
+                  epochs=300,
+                  batch_size=90,
+                  loss='mse')
+
+
+
+m = DenseNN(**config)
+
+
+config = dict(hidden_nodes=(64,),
+                  dropout=0.25,
+                  epochs=300,
+                  batch_size=90,
+                  loss='mse')
+
+hist = m.fit(X_train, y_train, X_valid, y_valid)
+
+#Summary of Model
+m.model.summary()
