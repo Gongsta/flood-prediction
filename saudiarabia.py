@@ -126,7 +126,7 @@ import xarray as xr
 #The open_mfdataset function automatically combines the many .nc files, the * represents the value that varies
 era5 = xr.open_mfdataset('../data/reanalysis-era5-single-levels_convective_precipitation,land_sea_mask,large_scale_precipitation,runoff,slope_of_sub_gridscale_orography,soil_type,total_column_water_vapour,volumetric_soil_water_layer_1,volumetric_soil_water_layer_2_*_*.nc', combine='by_coords')
 
-glofas = xr.open_mfdataset('../data/dataset-cems-glofas-historical-71364301-8a8a-4098-bca6-896e0e38e92f/CEMS_ECMWF_dis24_*_glofas_v2.1.nc', combine='by_coords')
+glofas = xr.open_mfdataset('../data/*/CEMS_ECMWF_dis24_*_glofas_v2.1.nc', combine='by_coords')
 
 
 #To read a single shape by calling its index use the shape() method. The index is the shape's count from 0.
@@ -169,8 +169,8 @@ danube_catchment = get_mask_of_basin(glofas['dis24'].isel(time=0))
 dis = glofas['dis'].where(danube_catchment)
 '''
 
-era5test = era5.isel(longitude=[-1,-2,-3], latitude=[0])
-glofas = glofas.isel(longitude=[-1], latitude=[0])
+era5test = era5.isel(longitude=[-10,-11,-13], latitude=[0])
+glofas = glofas.isel(longitude=[-20], latitude=[0])
 #Taking the average latitude and longitude
 era5 = era5.mean(['longitude','latitude'])
 glofas = glofas.mean(['lon','lat'])
