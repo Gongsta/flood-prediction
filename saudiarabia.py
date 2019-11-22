@@ -122,7 +122,6 @@ era5.to_netcdf(path="../data/2005-2010-era5.nc")
 glofas = xr.open_dataset("../data/glofas2001.nc")
 '''
 
-
 import xarray as xr
 #The open_mfdataset function automatically combines the many .nc files, the * represents the value that varies
 era5 = xr.open_mfdataset('../data/reanalysis-era5-single-levels_convective_precipitation,land_sea_mask,large_scale_precipitation,runoff,slope_of_sub_gridscale_orography,soil_type,total_column_water_vapour,volumetric_soil_water_layer_1,volumetric_soil_water_layer_2_*_*.nc', combine='by_coords')
@@ -139,6 +138,8 @@ danube_catchment = get_mask_of_basin(glofas['dis24'].isel(time=0))
 dis = glofas['dis'].where(danube_catchment)
 '''
 
+era5test = era5.isel(longitude=[-1,-2,-3], latitude=[0])
+glofas = glofas.isel
 #Taking the average latitude and longitude
 era5 = era5.mean(['longitude','latitude'])
 glofas = glofas.mean(['lon','lat'])
@@ -184,6 +185,8 @@ from dask.diagnostics import ProgressBar
 y = glofas['dis24']
 X = era5
 
+yPertinent = y
+XPertinent = X.isel()
 from functions.utils_floodmodel import reshape_scalar_predictand
 X, y = reshape_scalar_predictand(X, y)
 X.features
@@ -334,3 +337,32 @@ hist = m.fit(X_train, y_train, X_valid, y_valid)
 
 #Summary of Model
 m.model.summary()
+
+m.save('./')
+#save model
+
+
+"""
+#plot Graph of Network
+from keras.utils import plot_model
+plot_model(m.model, to_file='model.png', show_shapes=True)
+
+h = hist.model.history
+
+# Plot training & validation loss value
+fig, ax = plt.subplots(figsize=(8,4))
+ax.plot(h.history['loss'], label='loss')
+ax.plot(h.history['val_loss'], label='val_loss')
+plt.title('Learning curve')
+ax.set_ylabel('Loss')
+ax.set_xlabel('Epoch')
+plt.legend(['Training', 'Validation'])
+ax.set_yscale('log')
+
+"""
+
+from functions.plot import plot_multif_prediction
+
+title='Setting: Time-Delay Neural Net: 64 hidden nodes, dropout 0.25'
+plot_multif_prediction(y_pred_test, y_orig, forecast_range=14, title=title);
+
