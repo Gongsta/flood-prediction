@@ -151,8 +151,11 @@ for name in dir(shapes[3]):
 #'shapeType'
 #'shapeTypeName'
 #Read the following documentation to learn more
-shapes[4].bbox
 
+#Creating an array of all the basins in the world
+basins = []
+for n in range(len(shapes)):
+    basins.append(shapes[n].bbox)
 
 
 
@@ -167,7 +170,7 @@ dis = glofas['dis'].where(danube_catchment)
 '''
 
 era5test = era5.isel(longitude=[-1,-2,-3], latitude=[0])
-glofas = glofas.isel)longitude=[-1], latitude=[0])
+glofas = glofas.isel(longitude=[-1], latitude=[0])
 #Taking the average latitude and longitude
 era5 = era5.mean(['longitude','latitude'])
 glofas = glofas.mean(['lon','lat'])
