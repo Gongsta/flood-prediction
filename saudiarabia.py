@@ -129,6 +129,34 @@ era5 = xr.open_mfdataset('../data/reanalysis-era5-single-levels_convective_preci
 glofas = xr.open_mfdataset('../data/dataset-cems-glofas-historical-71364301-8a8a-4098-bca6-896e0e38e92f/CEMS_ECMWF_dis24_*_glofas_v2.1.nc', combine='by_coords')
 
 
+#To read a single shape by calling its index use the shape() method. The index is the shape's count from 0.
+# So to read the 8th shape record you would use its index which is 7.
+import shapefile
+
+sf = shapefile.Reader("../data/Saudi_bassins/saudi_arabia_bassins.shp")
+
+shapes = sf.shapes()
+
+"""
+#View the characteristics of the shape file
+for name in dir(shapes[3]):
+    if not name.startswith('_'):
+        print(name)
+
+"""
+#The shapefile we are using has 5 attributes:
+#'bbox'
+#'parts'
+#'points'
+#'shapeType'
+#'shapeTypeName'
+#Read the following documentation to learn more
+shapes[4].bbox
+
+
+
+
+
 
 from functions.utils_floodmodel import get_mask_of_basin, add_shifted_variables, reshape_scalar_predictand
 
@@ -139,7 +167,7 @@ dis = glofas['dis'].where(danube_catchment)
 '''
 
 era5test = era5.isel(longitude=[-1,-2,-3], latitude=[0])
-glofas = glofas.isel
+glofas = glofas.isel)longitude=[-1], latitude=[0])
 #Taking the average latitude and longitude
 era5 = era5.mean(['longitude','latitude'])
 glofas = glofas.mean(['lon','lat'])
