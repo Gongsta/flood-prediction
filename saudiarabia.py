@@ -169,11 +169,16 @@ danube_catchment = get_mask_of_basin(glofas['dis24'].isel(time=0))
 dis = glofas['dis'].where(danube_catchment)
 '''
 
-era5test = era5.isel(longitude=[-10,-11,-13], latitude=[0])
-glofas = glofas.isel(longitude=[-20], latitude=[0])
-#Taking the average latitude and longitude
-era5 = era5.mean(['longitude','latitude'])
-glofas = glofas.mean(['lon','lat'])
+era5 = era5.sel(latitude=['20.25','20.35'], longitude=['45.75', '46'])
+
+#Problem where I have to hand manually type this with the many integers
+#This doesnt work:
+#glofas = glofas.sel(lat='89.95', lon='45.75')
+glofas = glofas.sel(lat=['20.25','20.35'], lon=['45.75000000000003','46.05000000000001'])
+
+#Taking the average latitude and longitude if necessary
+era5 = era5.mean(['latitude','longitude'])
+glofas = glofas.mean(['lat','lon'])
 
 #Visualizing the features
 #Converting to a dataarray
@@ -225,8 +230,8 @@ X.features
 #Splitting the dataset into training, test, and validation
 
 period_train = dict(time=slice(None, '2005'))
-period_valid = dict(time=slice('2006', '2009'))
-period_test = dict(time=slice('2009', '2010'))
+period_valid = dict(time=slice('2006', '2007'))
+period_test = dict(time=slice('2007', '2010'))
 
 X_train, y_train = X.loc[period_train], y.loc[period_train]
 X_valid, y_valid = X.loc[period_valid], y.loc[period_valid]
