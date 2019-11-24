@@ -103,7 +103,7 @@ for i in range(2,32):
 #Saving the 31 glofas to a single .nc file, stored in exterior folder not committed to github (the file is 670mb per month)
 glofas.to_netcdf(path="../data/glofas2001.nc")
 
-#Putting all of era5 into a single file
+#Putting all of era5 into a single file, not necessary. Use .open_mfdataset instead
 era5 = xr.open_dataset('../data/reanalysis-era5-single-levels_convective_precipitation,land_sea_mask,large_scale_precipitation,runoff,slope_of_sub_gridscale_orography,soil_type,total_column_water_vapour,volumetric_soil_water_layer_1,volumetric_soil_water_layer_2_2005_01.nc')
 
 for n in range(5,11):
@@ -165,14 +165,14 @@ from functions.utils_floodmodel import get_mask_of_basin, add_shifted_variables,
 
 '''
 #Get mask of basin Return a mask where all points outside the selected basin are False.
-danube_catchment = get_mask_of_basin(glofas['dis24'].isel(time=0))
+danube_catchment = get_mask_of_basin(glofas['dis'].isel(time=0))
 dis = glofas['dis'].where(danube_catchment)
 '''
 
 era5 = era5.sel(latitude=['20.25','20.5'], longitude=['45.75','46'])
 
 
-#Problem where I have to hand manually type this with the many integers
+"""Problem where I have to hand manually type this with the many integers"""
 #This doesnt work:
 #glofas = glofas.sel(lat='89.95', lon='45.75')
 glofas = glofas.sel(lat=['20.25','19.75'], lon=['45.75000000000003','46.05000000000001'])
@@ -190,17 +190,13 @@ import matplotlib.pyplot as plt
 for f in era5visualization.features:
     plt.figure(figsize=(15,5))
     era5visualization.sel(features=f).plot(ax=plt.gca())
-    #plt.savefig('era5visualization.png', dpi=600, bbox_inches='tight')
+    plt.savefig('./images/'+str(f)+ 'era5'+'.png', dpi=600, bbox_inches='tight')
 
 
 for f in glofasvisualization.features:
     plt.figure(figsize=(15,5))
     glofasvisualization.sel(features=f).plot(ax=plt.gca())
-
-    #plt.savefig('glofasvisualization.png', dpi=600, bbox_inches='tight')
-
-#sample_data = xr.merge([glofas, era5])
-
+    plt.savefig('./images/glofasvisualization'+str(f)+'.png', dpi=600, bbox_inches='tight')
 
 
 #Creating the model
@@ -218,12 +214,9 @@ client = Client(cluster)  # memory_limit='16GB',
 import xarray as xr
 from dask.diagnostics import ProgressBar
 
-
 y = glofas['dis24']
 X = era5
 
-yPertinent = y
-XPertinent = X.isel()
 from functions.utils_floodmodel import reshape_scalar_predictand
 X, y = reshape_scalar_predictand(X, y)
 
@@ -233,23 +226,24 @@ X.features
 
 #Splitting the dataset into training, test, and validation
 
-period_train = dict(time=slice(None, '2005'))
-period_valid = dict(time=slice('2006', '2007'))
-period_test = dict(time=slice('2007', '2010'))
+period_train = dict(time=slice('2005', '2008'))
+period_valid = dict(time=slice('2008', '2009'))
+period_test = dict(time=slice('2009', '2010'))
 
 X_train, y_train = X.loc[period_train], y.loc[period_train]
 X_valid, y_valid = X.loc[period_valid], y.loc[period_valid]
 X_test, y_test = X.loc[period_test], y.loc[period_test]
 
 
+""""""
 #Visualizing the distribution of discharge
 import seaborn as sns
 sns.distplot(y)
 plt.ylabel('density')
-plt.xlim([-100, 400])
+plt.xlim([0, 0.001])
 plt.title('distribution of discharge')
 plt.plot()
-#lt.savefig('distribution_dis.png', dpi=600, bbox_inches='tight')
+#plt.savefig('distribution_dis.png', dpi=600, bbox_inches='tight')
 
 
 from sklearn.pipeline import Pipeline
@@ -376,14 +370,15 @@ hist = m.fit(X_train, y_train, X_valid, y_valid)
 #Summary of Model
 m.model.summary()
 
-m.save('./')
+m.model.save('modeltest.h5')
 #save model
-
+from keras.utils import plot_model
 
 """
 #plot Graph of Network
 from keras.utils import plot_model
-plot_model(m.model, to_file='model.png', show_shapes=True)
+plot_model(m.model, to_file='./images/model.png', show_shapes=True)
+
 
 h = hist.model.history
 
@@ -396,6 +391,7 @@ ax.set_ylabel('Loss')
 ax.set_xlabel('Epoch')
 plt.legend(['Training', 'Validation'])
 ax.set_yscale('log')
+plt.savefig('./images/glofasvisualization.png', dpi=600, bbox_inches='tight')
 
 """
 
