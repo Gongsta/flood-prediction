@@ -60,3 +60,4 @@ dependencies:
   - xarray
   - yaml
   - pyshp
+  - pydot

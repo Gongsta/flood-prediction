@@ -242,7 +242,7 @@ def reshape_scalar_predictand(X_dis, y):
 
     # merge times
     yar.coords['features'] = 'predictand'
-    Xy = xr.concat([Xar, yar], dim='features')  # maybe merge instead concat?
+    Xy = xr.merge([Xar, yar], dim='features')  # maybe merge instead concat?
     Xyt = Xy.dropna('time', how='any')  # drop rows with nan values
 
     Xda = Xyt[:, :-1]  # last column is predictand

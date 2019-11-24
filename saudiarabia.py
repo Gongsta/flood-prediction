@@ -169,12 +169,13 @@ danube_catchment = get_mask_of_basin(glofas['dis24'].isel(time=0))
 dis = glofas['dis'].where(danube_catchment)
 '''
 
-era5 = era5.sel(latitude=['20.25','20.35'], longitude=['45.75', '46'])
+era5 = era5.sel(latitude=['20.25','20.5'], longitude=['45.75','46'])
+
 
 #Problem where I have to hand manually type this with the many integers
 #This doesnt work:
 #glofas = glofas.sel(lat='89.95', lon='45.75')
-glofas = glofas.sel(lat=['20.25','20.35'], lon=['45.75000000000003','46.05000000000001'])
+glofas = glofas.sel(lat=['20.25','19.75'], lon=['45.75000000000003','46.05000000000001'])
 
 #Taking the average latitude and longitude if necessary
 era5 = era5.mean(['latitude','longitude'])
@@ -225,6 +226,9 @@ yPertinent = y
 XPertinent = X.isel()
 from functions.utils_floodmodel import reshape_scalar_predictand
 X, y = reshape_scalar_predictand(X, y)
+
+"""PROBLEM"""
+#need to fix dimensionality problem, since GloFAS is a daily dataset, whereas ERA5 iss an hourly dataset. I would want to uppscale instead of downscale.
 X.features
 
 #Splitting the dataset into training, test, and validation
@@ -274,6 +278,7 @@ def add_time(vector, time, name=None):
 
 class DenseNN(object):
     def __init__(self, **kwargs):
+        self.output_dim = 1
         self.xscaler = StandardScaler()
         self.yscaler = StandardScaler()
 
@@ -352,7 +357,8 @@ class DenseNN(object):
                               callbacks=self.callbacks,
                               verbose=0, **kwargs)
 
-    config = dict(hidden_nodes=(64,),
+
+config = dict(hidden_nodes=(64,),
                   dropout=0.25,
                   epochs=300,
                   batch_size=90,
@@ -363,11 +369,7 @@ class DenseNN(object):
 m = DenseNN(**config)
 
 
-config = dict(hidden_nodes=(64,),
-                  dropout=0.25,
-                  epochs=300,
-                  batch_size=90,
-                  loss='mse')
+
 
 hist = m.fit(X_train, y_train, X_valid, y_valid)
 
@@ -400,5 +402,5 @@ ax.set_yscale('log')
 from functions.plot import plot_multif_prediction
 
 title='Setting: Time-Delay Neural Net: 64 hidden nodes, dropout 0.25'
-plot_multif_prediction(y_pred_test, y_orig, forecast_range=14, title=title);
+plot_multif_prediction(y_pred_test, y_orig, forecast_range=14, title=title)
 
