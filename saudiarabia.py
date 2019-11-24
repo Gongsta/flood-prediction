@@ -1,4 +1,6 @@
+'''
 #Data extraction
+
 
 #Saving our API key so that we can use Climate Data Store API to extract data
 UID = '26343'
@@ -88,6 +90,7 @@ c.retrieve(
 
 
 import xarray as xr
+'''
 
 #Data Preprocessing
 '''
@@ -158,7 +161,11 @@ for n in range(len(shapes)):
     basins.append(shapes[n].bbox)
 
 
-
+latitudeList = []
+longitudeList = []
+for point in basins:
+    latitudeList.append(point[0])
+    longitudeList.append(point[1])
 
 
 from functions.utils_floodmodel import get_mask_of_basin, add_shifted_variables, reshape_scalar_predictand
@@ -169,7 +176,7 @@ danube_catchment = get_mask_of_basin(glofas['dis'].isel(time=0))
 dis = glofas['dis'].where(danube_catchment)
 '''
 
-era5 = era5.sel(latitude=['20.25','20.5'], longitude=['45.75','46'])
+era5 = era5.sel(latitude=['19,75','20','20.25','20.5'], longitude=['45.75','46'])
 
 
 """Problem where I have to hand manually type this with the many integers"""
@@ -355,7 +362,7 @@ class DenseNN(object):
 config = dict(hidden_nodes=(64,),
                   dropout=0.25,
                   epochs=300,
-                  batch_size=90,
+                  batch_size=50,
                   loss='mse')
 
 
@@ -391,12 +398,26 @@ ax.set_ylabel('Loss')
 ax.set_xlabel('Epoch')
 plt.legend(['Training', 'Validation'])
 ax.set_yscale('log')
-plt.savefig('./images/glofasvisualization.png', dpi=600, bbox_inches='tight')
+plt.savefig('./images/learningcurve.png', dpi=600, bbox_inches='tight')
 
 """
+yaml_string = m.model.to_yaml()
+
+
+with open('./models/keras-config.yml', 'w') as f:
+    yaml.dump(yaml_string, f)
+
+with open('./models/model-config.yml', 'w') as f:
+    yaml.dump(config, f, indent=4)
+
+from contextlib import redirect_stdout
+with open('./models/summary.txt', "w") as f:
+    with redirect_stdout(f):
+        m.model.summary()
 
 from functions.plot import plot_multif_prediction
 
 title='Setting: Time-Delay Neural Net: 64 hidden nodes, dropout 0.25'
 plot_multif_prediction(y_pred_test, y_orig, forecast_range=14, title=title)
 
+#Update shapefile with Shapefile in order to include the predictions for each individual basin
