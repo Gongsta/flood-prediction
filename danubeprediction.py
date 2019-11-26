@@ -1,7 +1,101 @@
+"""Code to run for people trying to replicate this"""
+
+#Data extraction
+
+
+#Saving our API key so that we can use Climate Data Store API to extract data
+UID = '26343'
+API_key = 'b61b1b28-a04b-4cb3-acb1-b48775702011'
+
+import os
+with open(os.path.join(os.path.expanduser('~'), '.cdsapirc2'), 'w') as f:
+    f.write('url: https://cds.climate.copernicus.eu/api/v2\n')
+    f.write(f'key: {UID}:{API_key}')
+
+
+#Adding functions to our directory so we can use other functions
+import sys
+sys.path.append('./')
+from functions.data_download import CDS_Dataset
+
+
+#Downloading ERA5 Dataset
+
+ds = CDS_Dataset(dataset_name='reanalysis-era5-single-levels',
+                 save_to_folder='../data/Danube'  # path to where datasets shall be stored
+                )
+
+# define areas of interest (N/W/S/E)
+danube=[50, 7, 47, 20]
+
+# define time frame of the downlaod
+year_start = 2005
+year_end = 2010
+month_start = 1
+month_end = 12
+
+# define request variables
+request = dict(product_type='reanalysis',
+               format='netcdf',
+               area=danube,
+               variable=['convective_precipitation','land_sea_mask','large_scale_precipitation',
+            'runoff','slope_of_sub_gridscale_orography','soil_type',
+            'total_column_water_vapour','volumetric_soil_water_layer_1','volumetric_soil_water_layer_2'],
+               )
+
+#Sending the request
+ds.get(years = [str(y) for y in range(year_start, year_end+1)],
+       months = [str(a).zfill(2) for a in range(month_start, month_end+1)],
+       request = request,
+       N_parallel_requests = 12)
+
+
+
+#Code for downloading Glofas Data
+import cdsapi
+
+c = cdsapi.Client()
+
+c.retrieve(
+    'cems-glofas-historical',
+    {
+        'format':'zip',
+        'year':[
+            '2005','2006','2007','2008','2009','2010','2011','2012','2013','2014','2015','2016'
+        ],
+        'variable':'River discharge',
+        'month':[
+            '01','02','03',
+            '04','05','06',
+            '07','08','09',
+            '10','11','12'
+        ],
+        'day':[
+            '01','02','03',
+            '04','05','06',
+            '07','08','09',
+            '10','11','12',
+            '13','14','15',
+            '16','17','18',
+            '19','20','21',
+            '22','23','24',
+            '25','26','27',
+            '28','29','30',
+            '31'
+        ],
+        'dataset':'Consolidated reanalysis',
+        'version':'2.1'
+    },
+    'download.zip')
+
+
+
+import xarray as xr
+
 
 import xarray as xr
 #The open_mfdataset function automatically combines the many .nc files, the * represents the value that varies
-era5 = xr.open_mfdataset('../data/reanalysis-era5-single-levels_convective_precipitation,land_sea_mask,large_scale_precipitation,runoff,slope_of_sub_gridscale_orography,soil_type,total_column_water_vapour,volumetric_soil_water_layer_1,volumetric_soil_water_layer_2_*_*.nc', combine='by_coords')
+era5 = xr.open_mfdataset('../data/Danube/reanalysis-era5-single-levels_convective_precipitation,land_sea_mask,large_scale_precipitation,runoff,slope_of_sub_gridscale_orography,soil_type,total_column_water_vapour,volumetric_soil_water_layer_1,volumetric_soil_water_layer_2_*_*.nc', combine='by_coords')
 
 glofas = xr.open_mfdataset('../data/*/CEMS_ECMWF_dis24_*_glofas_v2.1.nc', combine='by_coords')
 
@@ -51,12 +145,13 @@ danube_catchment = get_mask_of_basin(glofas['dis'].isel(time=0))
 dis = glofas['dis'].where(danube_catchment)
 '''
 
-era5 = era5.sel(latitude=['19,75','20','20.25','20.5'], longitude=['45.75','46'])
 
 
 """Problem where I have to hand manually type this with the many integers"""
 #This doesnt work:
 #glofas = glofas.sel(lat='89.95', lon='45.75')
+
+#[50, 7, 47, 20]
 glofas = glofas.sel(lat=['20.25','19.75'], lon=['45.75000000000003','46.05000000000001'])
 
 #Taking the average latitude and longitude if necessary
@@ -102,6 +197,42 @@ X = era5
 from functions.utils_floodmodel import reshape_scalar_predictand
 X, y = reshape_scalar_predictand(X, y)
 
+"""
+def feature_preproc(era5, glofas, timeinit, timeend):
+
+    era5_features = era5
+    
+    # interpolate to glofas grid
+    era5_features = era5_features.interp(latitude=glofas.latitude,
+                                         longitude=glofas.longitude)
+    # time subset
+    era5_features = era5_features.sel(time=slice(timeinit, timeend))
+    glofas = glofas.sel(time=slice(timeinit, timeend))
+
+    # select the point of interest
+    # poi = dict(latitude=48.403, longitude=15.615)  # krems (lower austria), outside the test dataset
+    poi = dict(latitude=48.35, longitude=13.95)  # point in upper austria
+
+    dummy = glofas['dis'].isel(time=0)
+    danube_catchment = get_mask_of_basin(dummy, kw_basins='Danube')
+    X = era5_features.where(danube_catchment).mean(['latitude', 'longitude'])
+
+    # select area of interest and average over space for all features
+    dis = glofas.interp(poi)
+    y = dis.diff('time', 1)  # compare predictors to change in discharge
+
+    shifts = range(1, 3)
+    notshift_vars = ['swvl1', 'tcwv', 'rtp_500-850']
+    shift_vars = [v for v in X.data_vars if not v in notshift_vars]
+
+    X = add_shifted_variables(X, shifts, variables=shift_vars)
+
+    Xda, yda = reshape_scalar_predictand(X, y)  # reshape into dimensions (time, feature)
+    return Xda, yda
+
+
+X, y = feature_preproc(era5, glofas, '2005', '2010')
+"""
 """PROBLEM"""
 #need to fix dimensionality problem, since GloFAS is a daily dataset, whereas ERA5 iss an hourly dataset. I would want to uppscale instead of downscale.
 X.features

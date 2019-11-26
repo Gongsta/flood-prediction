@@ -42,7 +42,7 @@ def get_mask_of_basin(da, kw_basins='Danube'):
 
     # this shapefile is from natural earth data
     # http://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-1-states-provinces/
-    shp2 = "/Users/stevengong/Desktop/flood-prediction/ne_10m_admin_1_states_provinces.shp"
+    shp2 = "/Users/stevengong/Desktop/data/Saudi_bassins/saudi_arabia_bassins.shp"
     basins = geopandas.read_file(shp2)
     single_basin = basins.query("NAME == '"+kw_basins+"'").reset_index(drop=True)
     shapes = [(shape, n) for n, shape in enumerate(single_basin.geometry)]
