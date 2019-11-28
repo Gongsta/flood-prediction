@@ -147,12 +147,23 @@ dis = glofas['dis'].where(danube_catchment)
 
 
 
-"""Problem where I have to hand manually type this with the many integers"""
-#This doesnt work:
-#glofas = glofas.sel(lat='89.95', lon='45.75')
-
 #[50, 7, 47, 20]
-glofas = glofas.sel(lat=['20.25','19.75'], lon=['45.75000000000003','46.05000000000001'])
+
+tempLat = glofas.lat.values
+lat = []
+tempLon = glofas.lon.values
+lon = []
+for i in tempLat:
+    if i<=50 and i>=47:
+        lat.append(i)
+
+for i in tempLon:
+    if i<=20 and i>=7:
+        lon.append(i)
+
+
+
+glofas = glofas.sel(lat=lat, lon=lon)
 
 #Taking the average latitude and longitude if necessary
 era5 = era5.mean(['latitude','longitude'])
@@ -167,13 +178,13 @@ import matplotlib.pyplot as plt
 for f in era5visualization.features:
     plt.figure(figsize=(15,5))
     era5visualization.sel(features=f).plot(ax=plt.gca())
-    plt.savefig('./images/'+str(f)+ 'era5'+'.png', dpi=600, bbox_inches='tight')
+    plt.savefig('./images/danube/'+str(f)+ 'era5'+'.png', dpi=600, bbox_inches='tight')
 
 
 for f in glofasvisualization.features:
     plt.figure(figsize=(15,5))
     glofasvisualization.sel(features=f).plot(ax=plt.gca())
-    plt.savefig('./images/glofasvisualization'+str(f)+'.png', dpi=600, bbox_inches='tight')
+    plt.savefig('./images/danube/glofasvisualization'+str(f)+'.png', dpi=600, bbox_inches='tight')
 
 
 #Creating the model
