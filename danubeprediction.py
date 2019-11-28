@@ -264,10 +264,10 @@ X_test, y_test = X.loc[period_test], y.loc[period_test]
 import seaborn as sns
 sns.distplot(y)
 plt.ylabel('density')
-plt.xlim([0, 0.001])
+plt.xlim([0, 150])
 plt.title('distribution of discharge')
 plt.plot()
-#plt.savefig('distribution_dis.png', dpi=600, bbox_inches='tight')
+plt.savefig('./images/danube/distribution_dis.png', dpi=600, bbox_inches='tight')
 
 
 from sklearn.pipeline import Pipeline
@@ -398,10 +398,10 @@ m.model.save('modeltest.h5')
 #save model
 from keras.utils import plot_model
 
-"""
+
 #plot Graph of Network
 from keras.utils import plot_model
-plot_model(m.model, to_file='./images/model.png', show_shapes=True)
+plot_model(m.model, to_file='./images/danube/model.png', show_shapes=True)
 
 
 h = hist.model.history
@@ -415,9 +415,9 @@ ax.set_ylabel('Loss')
 ax.set_xlabel('Epoch')
 plt.legend(['Training', 'Validation'])
 ax.set_yscale('log')
-plt.savefig('./images/learningcurve.png', dpi=600, bbox_inches='tight')
+plt.savefig('./images/danube/learningcurve.png', dpi=600, bbox_inches='tight')
 
-"""
+
 yaml_string = m.model.to_yaml()
 
 
