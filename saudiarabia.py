@@ -29,29 +29,53 @@ for name in dir(shapes[3]):
 #'shapeTypeName'
 #Read the following documentation to learn more
 
-#Creating an array of all the basins in the world
+#Creating an array of all the basins in Saudi Arabia
 basins = []
 for n in range(len(shapes)):
     basins.append(shapes[n].bbox)
 
 
-latitudeList = []
-longitudeList = []
-for point in basins:
-    latitudeList.append(point[0])
-    longitudeList.append(point[1])
+def find_nearest(array, value):
+    array = np.asarray(array)
+    idx = (np.abs(array - value)).argmin()
+    return array[idx]
 
 
-from functions.utils_floodmodel import get_mask_of_basin, add_shifted_variables, reshape_scalar_predictand
+def createPointList(latMin, lonMin, latMax, lonMax, latList, lonList):
+
+    #Lat is a list of all the available latitudes
+    #Lon is a list of all the available longitudes
+
+    lat = []
+    lon = []
+    for i in latList:
+        if i <= latMax and i >= latMin:
+            lat.append(i)
+
+    for i in lonList:
+        if i <= lonMax and i >= lonMin:
+            lon.append(i)
 
 
-'''
-#Get mask of basin Return a mask where all points outside the selected basin are False.
-danube_catchment = get_mask_of_basin(glofas['dis'].isel(time=0))
-dis = glofas['dis'].where(danube_catchment)
-'''
+    if not lat:
+        averageLat = (latMin + latMax)/2
+        lat.append(find_nearest(latList, averageLat))
 
-era5 = era5.sel(latitude=['19,75','20','20.25','20.5'], longitude=['45.75','46'])
+
+    if not lon:
+        averageLon = (lonMin + lonMax)/2
+        lon.append(find_nearest(lonList, averageLon))
+
+
+
+    return lat, lon
+
+
+lat, lon = createPointList(basins[20][1],basins[20][0], basins[20][3], basins[20][2],era5.latitude.values,era5.longitude.values)
+lat, lon = createPointList(basins[20][1],basins[20][0], basins[20][3], basins[20][2],glofas.lat.values,glofas.lon.values)
+
+
+era5 = era5.sel(latitude=lat, longitude=lon)
 
 
 """Problem where I have to hand manually type this with the many integers"""
