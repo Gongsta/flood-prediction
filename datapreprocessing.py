@@ -32,7 +32,8 @@ shapes = sf.shapes()
 
 records = sf.records()
 
-basin = "Seine"
+#Insert the name of the basin
+basin = ""
 
 
 #function that returns the index of the basin based on its name
@@ -104,8 +105,6 @@ lat, lon = createPointList(bbox[1], bbox[0], bbox[3], bbox[2], glofas.lat.values
 
 era5 = era5.sel(latitude=lat, longitude=lon)
 glofas = glofas.sel(latitude=lat, longitude=lon)
-
-
 
 
 era5 = era5.mean(['latitude','longitude'])
