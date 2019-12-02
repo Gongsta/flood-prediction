@@ -22,7 +22,7 @@ from functions.data_download import CDS_Dataset
 #Downloading ERA5 Dataset
 
 ds = CDS_Dataset(dataset_name='reanalysis-era5-single-levels',
-                 save_to_folder='../data/Danube'  # path to where datasets shall be stored
+                 save_to_folder='../../data/Danube'  # path to where datasets shall be stored
                 )
 
 # define areas of interest (N/W/S/E)
@@ -95,9 +95,9 @@ import xarray as xr
 
 import xarray as xr
 #The open_mfdataset function automatically combines the many .nc files, the * represents the value that varies
-era5 = xr.open_mfdataset('../data/Danube/reanalysis-era5-single-levels_convective_precipitation,land_sea_mask,large_scale_precipitation,runoff,slope_of_sub_gridscale_orography,soil_type,total_column_water_vapour,volumetric_soil_water_layer_1,volumetric_soil_water_layer_2_*_*.nc', combine='by_coords')
+era5 = xr.open_mfdataset('../../data/Danube/reanalysis-era5-single-levels_convective_precipitation,land_sea_mask,large_scale_precipitation,runoff,slope_of_sub_gridscale_orography,soil_type,total_column_water_vapour,volumetric_soil_water_layer_1,volumetric_soil_water_layer_2_*_*.nc', combine='by_coords')
 
-glofas = xr.open_mfdataset('../data/*/CEMS_ECMWF_dis24_*_glofas_v2.1.nc', combine='by_coords')
+glofas = xr.open_mfdataset('../../data/*/CEMS_ECMWF_dis24_*_glofas_v2.1.nc', combine='by_coords')
 
 
 #To read a single shape by calling its index use the shape() method. The index is the shape's count from 0.
@@ -178,13 +178,13 @@ import matplotlib.pyplot as plt
 for f in era5visualization.features:
     plt.figure(figsize=(15,5))
     era5visualization.sel(features=f).plot(ax=plt.gca())
-    plt.savefig('./images/danube/'+str(f)+ 'era5'+'.png', dpi=600, bbox_inches='tight')
+    plt.savefig('../images/danube/'+str(f)+ 'era5'+'.png', dpi=600, bbox_inches='tight')
 
 
 for f in glofasvisualization.features:
     plt.figure(figsize=(15,5))
     glofasvisualization.sel(features=f).plot(ax=plt.gca())
-    plt.savefig('./images/danube/glofasvisualization'+str(f)+'.png', dpi=600, bbox_inches='tight')
+    plt.savefig('../images/danube/glofasvisualization'+str(f)+'.png', dpi=600, bbox_inches='tight')
 
 
 #Creating the model
@@ -267,7 +267,7 @@ plt.ylabel('density')
 plt.xlim([0, 150])
 plt.title('distribution of discharge')
 plt.plot()
-plt.savefig('./images/danube/distribution_dis.png', dpi=600, bbox_inches='tight')
+plt.savefig('..images/danube/distribution_dis.png', dpi=600, bbox_inches='tight')
 
 
 from sklearn.pipeline import Pipeline
@@ -401,7 +401,7 @@ from keras.utils import plot_model
 
 #plot Graph of Network
 from keras.utils import plot_model
-plot_model(m.model, to_file='./images/danube/model.png', show_shapes=True)
+plot_model(m.model, to_file='../images/danube/model.png', show_shapes=True)
 
 
 h = hist.model.history
@@ -415,20 +415,20 @@ ax.set_ylabel('Loss')
 ax.set_xlabel('Epoch')
 plt.legend(['Training', 'Validation'])
 ax.set_yscale('log')
-plt.savefig('./images/danube/learningcurve.png', dpi=600, bbox_inches='tight')
+plt.savefig('../images/danube/learningcurve.png', dpi=600, bbox_inches='tight')
 
 
 yaml_string = m.model.to_yaml()
 
 
-with open('./models/keras-config.yml', 'w') as f:
+with open('../models/keras-config.yml', 'w') as f:
     yaml.dump(yaml_string, f)
 
-with open('./models/model-config.yml', 'w') as f:
+with open('../models/model-config.yml', 'w') as f:
     yaml.dump(config, f, indent=4)
 
 from contextlib import redirect_stdout
-with open('./models/summary.txt', "w") as f:
+with open('../models/summary.txt', "w") as f:
     with redirect_stdout(f):
         m.model.summary()
 
