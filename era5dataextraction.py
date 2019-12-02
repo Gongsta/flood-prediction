@@ -18,9 +18,6 @@ ds = CDS_Dataset(dataset_name='reanalysis-era5-single-levels',
                 )
 
 # define areas of interest (a list of degrees latitude/longitude values for the northern, western, southern and eastern bounds of the area.)
-area_dict = dict(danube=[50, 7, 47, 20],
-                 asia=[55, -140, 0, 35],
-                 usa=[50, -125, 25, -70])
 
 # define time frame
 year_start = 2005
@@ -31,7 +28,8 @@ month_end = 12
 # define requested variables
 request = dict(product_type='reanalysis',
                format='netcdf',
-               area=area_dict['usa'],
+                #[N,W,S,E]
+               area=[90, -24, -90, 72],
                variable=['convective_precipitation', 'land_sea_mask', 'large_scale_precipitation',
                          'runoff', 'slope_of_sub_gridscale_orography', 'soil_type',
                          'total_column_water_vapour', 'volumetric_soil_water_layer_1', 'volumetric_soil_water_layer_2'])

@@ -27,7 +27,7 @@ for name in dir(shapes[3]):
 #'points'
 #'shapeType'
 #'shapeTypeName'
-#Read the following documentation to learn more
+#Read the following documentation to learn more: https://pypi.org/project/pyshp/
 
 #Creating an array of all the basins in Saudi Arabia
 basins = []
