@@ -18,6 +18,7 @@ records = sf.records()
 
 basin = "Elbe"
 
+#function that returns the index of the basin based on its name
 def get_basin_index(basin, records):
 
     for i in range(len(records)):
@@ -33,7 +34,7 @@ def return_area_basin(points, era5, glofas):
     return era5, glofas
 
 
-era5, glofas = return_area_basin([index].points, era5, glofas)
+era5, glofas = return_area_basin(shapes[index].points, era5, glofas)
 
 """
 #View the characteristics of the shape file
