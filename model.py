@@ -8,7 +8,6 @@ cluster = LocalCluster(processes=True)  # n_workers=10, threads_per_worker=1,
 client = Client(cluster)  # memory_limit='16GB',
 
 import xarray as xr
-from dask.diagnostics import ProgressBar
 
 y = glofas['dis24']
 X = era5
@@ -76,13 +75,11 @@ plt.ylabel('density')
 plt.xlim([0, 150])
 plt.title('distribution of discharge')
 plt.plot()
-plt.savefig('../images/Elbe/distribution_dis.png', dpi=600, bbox_inches='tight')
+plt.savefig('../images/generic/distribution_dis.png', dpi=600, bbox_inches='tight')
 
-from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 import keras
 from keras.layers.core import Dropout
-from keras.constraints import MinMaxNorm, nonneg
 
 
 def add_time(vector, time, name=None):
@@ -204,7 +201,7 @@ from keras.utils import plot_model
 # plot Graph of Network
 from keras.utils import plot_model
 
-plot_model(m.model, to_file='./images/danube/model.png', show_shapes=True)
+plot_model(m.model, to_file='./images/generic/model.png', show_shapes=True)
 
 h = hist.model.history
 

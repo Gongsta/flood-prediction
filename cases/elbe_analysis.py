@@ -1,6 +1,6 @@
 import xarray as xr
 #The open_mfdataset function automatically combines the many .nc files, the * represents the value that varies
-era5 = xr.open_mfdataset('/Volumes/Seagate Backup Plus Drive/data/reanalysis-era5-single-levels_convective_precipitation,land_sea_mask,large_scale_precipitation,runoff,slope_of_sub_gridscale_orography,soil_type,total_column_water_vapour,volumetric_soil_water_layer_1,volumetric_soil_water_layer_2_*_*.nc', combine='by_coords')
+era5 = xr.open_mfdataset('/Volumes/Seagate Backup Plus Drive/data/Elbe/reanalysis-era5-single-levels_convective_precipitation,land_sea_mask,large_scale_precipitation,runoff,slope_of_sub_gridscale_orography,soil_type,total_column_water_vapour,volumetric_soil_water_layer_1,volumetric_soil_water_layer_2_*_*.nc', combine='by_coords')
 
 glofas = xr.open_mfdataset('/Volumes/Seagate Backup Plus Drive/data/*/CEMS_ECMWF_dis24_*_glofas_v2.1.nc', combine='by_coords')
 
@@ -321,7 +321,7 @@ ax.set_ylabel('Loss')
 ax.set_xlabel('Epoch')
 plt.legend(['Training', 'Validation'])
 ax.set_yscale('log')
-plt.savefig('./images/danube/learningcurve.png', dpi=600, bbox_inches='tight')
+plt.savefig('../images/Elbe/learningcurve.png', dpi=600, bbox_inches='tight')
 
 yaml_string = m.model.to_yaml()
 

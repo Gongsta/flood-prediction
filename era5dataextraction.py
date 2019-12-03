@@ -14,14 +14,14 @@ sys.path.append('../')
 from functions.data_download import CDS_Dataset
 
 ds = CDS_Dataset(dataset_name='reanalysis-era5-single-levels',
-                 save_to_folder='/Volumes/Seagate Backup Plus Drive/data'  # path to where datasets shall be stored
+                 save_to_folder='/Volumes/Seagate Backup Plus Drive/data/Elbe'  # path to where datasets shall be stored
                 )
 
 # define areas of interest (a list of degrees latitude/longitude values for the northern, western, southern and eastern bounds of the area.)
 
 # define time frame
-year_start = 2005
-year_end = 2016
+year_start = 1999
+year_end = 2019
 month_start = 1
 month_end = 12
 
@@ -29,7 +29,7 @@ month_end = 12
 request = dict(product_type='reanalysis',
                format='netcdf',
                 #[N,W,S,E]
-               area=[90, -24, -90, 72],
+               area=[54, 9, 48, 17],
                variable=['convective_precipitation', 'land_sea_mask', 'large_scale_precipitation',
                          'runoff', 'slope_of_sub_gridscale_orography', 'soil_type',
                          'total_column_water_vapour', 'volumetric_soil_water_layer_1', 'volumetric_soil_water_layer_2'])
