@@ -104,7 +104,7 @@ lat, lon = createPointList(bbox[1], bbox[0], bbox[3], bbox[2], glofas.lat.values
 
 
 era5 = era5.sel(latitude=lat, longitude=lon)
-glofas = glofas.sel(latitude=lat, longitude=lon)
+glofas = glofas.sel(lat=lat, lon=lon)
 
 
 era5 = era5.mean(['latitude','longitude'])

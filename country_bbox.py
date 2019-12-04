@@ -1,6 +1,7 @@
 # extracted from http//www.naturalearthdata.com/download/110m/cultural/ne_110m_admin_0_countries.zip
 # under public domain terms
 
+#W, S, E, N
 country_bounding_boxes = {
     'AF': ('Afghanistan', (60.5284298033, 29.318572496, 75.1580277851, 38.4862816432)),
     'AO': ('Angola', (11.6400960629, -17.9306364885, 24.0799052263, -4.43802336998)),

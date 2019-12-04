@@ -19,25 +19,31 @@ ds = CDS_Dataset(dataset_name='reanalysis-era5-single-levels',
 
 # define areas of interest (a list of degrees latitude/longitude values for the northern, western, southern and eastern bounds of the area.)
 
-# define time frame
-year_start = 1999
-year_end = 2019
-month_start = 1
-month_end = 12
+from country_bbox import *
 
+# define time frame
+year_start = 2012
+year_end = 2012
+month_start = 1
+month_end = 2
+
+bangladesh = [country_bounding_boxes['BD'][1][3], country_bounding_boxes['BD'][1][0], country_bounding_boxes['BD'][1][1], country_bounding_boxes['BD'][1][2]]
 # define requested variables
 request = dict(product_type='reanalysis',
                format='netcdf',
                 #[N,W,S,E]
+
+               #[54, 9, 48, 17]
                area=[54, 9, 48, 17],
                variable=['convective_precipitation', 'land_sea_mask', 'large_scale_precipitation',
                          'runoff', 'slope_of_sub_gridscale_orography', 'soil_type',
                          'total_column_water_vapour', 'volumetric_soil_water_layer_1', 'volumetric_soil_water_layer_2'])
 
 #Sending the request
+
+
 ds.get(years = [str(y) for y in range(year_start, year_end+1)],
        months = [str(a).zfill(2) for a in range(month_start, month_end+1)],
        request = request,
        N_parallel_requests = 12)
-
 

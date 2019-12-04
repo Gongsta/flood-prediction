@@ -4,7 +4,6 @@ era5 = xr.open_mfdataset('/Volumes/Seagate Backup Plus Drive/data/Elbe/reanalysi
 
 glofas = xr.open_mfdataset('/Volumes/Seagate Backup Plus Drive/data/*/CEMS_ECMWF_dis24_*_glofas_v2.1.nc', combine='by_coords')
 
-
 #To read a single shape by calling its index use the shape() method. The index is the shape's count from 0.
 # So to read the 8th shape record you would use its index which is 7.
 import shapefile
@@ -70,16 +69,23 @@ def createPointList(latMin, lonMin, latMax, lonMax, latList, lonList):
     return lat, lon
 
 
-lat, lon = createPointList(bbox[1], bbox[0], bbox[3], bbox[2], era5.latitude.values,era5.longitude.values)
+lat, lon = createPointList(bbox[1], bbox[0], bbox[3], bbox[2], era5.latitude.values, era5.longitude.values)
 lat, lon = createPointList(bbox[1], bbox[0], bbox[3], bbox[2], glofas.lat.values,glofas.lon.values)
 
 
-era5 = era5.sel(latitude=lat, longitude=lon)
-glofas = glofas.sel(latitude=lat, longitude=lon)
+#era5 = era5.sel(latitude=lat, longitude=lon)
+glofas = glofas.sel(lat=lat, lon=lon)
 
 # Taking the average latitude and longitude if necessary
 era5 = era5.mean(['latitude', 'longitude'])
 glofas = glofas.mean(['lat', 'lon'])
+
+#Visualizing the discharge
+dis_mean = glofas['dis'].mean('time')
+dis_mean.plot()
+plt.title('Mean discharge in Elbe from 1999-2019')
+plt.savefig('./images/Elbe/dischargevisualization', dpi=600)
+
 
 # Visualizing the features
 # Converting to a dataarray
@@ -91,12 +97,12 @@ import matplotlib.pyplot as plt
 for f in era5visualization.features:
     plt.figure(figsize=(15, 5))
     era5visualization.sel(features=f).plot(ax=plt.gca())
-    plt.savefig('./images/danube/' + str(f) + 'era5' + '.png', dpi=600, bbox_inches='tight')
+    plt.savefig('./images/Elbe/' + str(f) + 'era5' + '.png', dpi=600, bbox_inches='tight')
 
 for f in glofasvisualization.features:
     plt.figure(figsize=(15, 5))
     glofasvisualization.sel(features=f).plot(ax=plt.gca())
-    plt.savefig('./images/danube/glofasvisualization' + str(f) + '.png', dpi=600, bbox_inches='tight')
+    plt.savefig('./images/Elbe/glofasvisualization' + str(f) + '.png', dpi=600, bbox_inches='tight')
 
 # Creating the model
 import numpy as np
