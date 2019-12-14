@@ -76,15 +76,17 @@ lat, lon = createPointList(bbox[1], bbox[0], bbox[3], bbox[2], glofas.lat.values
 #era5 = era5.sel(latitude=lat, longitude=lon)
 glofas = glofas.sel(lat=lat, lon=lon)
 
-# Taking the average latitude and longitude if necessary
-era5 = era5.mean(['latitude', 'longitude'])
-glofas = glofas.mean(['lat', 'lon'])
-
+import matplotlib.pyplot as plt
 #Visualizing the discharge
-dis_mean = glofas['dis'].mean('time')
+dis_mean = glofas['dis24'].mean('time')
 dis_mean.plot()
 plt.title('Mean discharge in Elbe from 1999-2019')
 plt.savefig('./images/Elbe/dischargevisualization', dpi=600)
+
+# Taking the average latitude and longitude if necessary
+#era5 = era5.mean(['latitude', 'longitude'])
+#glofas = glofas.mean(['lat', 'lon'])
+
 
 
 # Visualizing the features
@@ -126,6 +128,7 @@ X = era5
 from functions.utils_floodmodel import reshape_scalar_predictand
 
 X, y = reshape_scalar_predictand(X, y)
+#Reshape this so that each point is a predictor
 
 """
 def feature_preproc(era5, glofas, timeinit, timeend):
@@ -170,7 +173,7 @@ X.features
 # Splitting the dataset into training, test, and validation
 
 period_train = dict(time=slice('2005', '2012'))
-period_valid = dict(time=slice('2014', '2015'))
+period_valid = dict(time=slice('2013', '2015'))
 period_test = dict(time=slice('2015', '2016'))
 
 X_train, y_train = X.loc[period_train], y.loc[period_train]
@@ -307,14 +310,14 @@ hist = m.fit(X_train, y_train, X_valid, y_valid)
 # Summary of Model
 m.model.summary()
 
-m.model.save('modeltest.h5')
+m.model.save('elbemodel.h5')
 # save model
 from keras.utils import plot_model
 
 # plot Graph of Network
 from keras.utils import plot_model
 
-plot_model(m.model, to_file='./images/danube/model.png', show_shapes=True)
+plot_model(m.model, to_file='./images/Elbe/model.png', show_shapes=True)
 
 h = hist.model.history
 
@@ -362,5 +365,20 @@ from functions.plot import plot_multif_prediction
 
 title = 'Setting: Time-Delay Neural Net: 64 hidden nodes, dropout 0.25'
 plot_multif_prediction(y_pred_test, y_test, forecast_range=14, title=title)
+
+
+
+
+
+#Test case of Elbe basin during end of May-Beginning of June 2013 (flood happened in June 4th) to verify how well my model can predict flooding
+import pandas as pd
+time_range = pd.date_range('2013-05-15', periods=69)
+y_case = y.loc[time_range]
+
+fig, ax = plt.subplots(figsize=(15, 5))
+color_scheme = ['g', 'cyan', 'magenta', 'k']
+plt.title('Case study Elbe Basin May/June 2013')
+
+y_case.to_pandas().plot(ax=ax, label='reanalysis', lw=4)
 
 # Update shapefile with Shapefile in order to include the predictions for each individual basin
