@@ -1,3 +1,8 @@
+import sys
+sys.path.append('/Users/stevengong/Desktop/flood-prediction')
+from functions.utils_floodmodel import get_basin_index, get_mask_of_basin, createPointList, shift_and_aggregate, select_riverpoints
+
+
 import xarray as xr
 #The open_mfdataset function automatically combines the many .nc files, the * represents the value that varies
 era5 = xr.open_mfdataset('/Volumes/Seagate Backup Plus Drive/data/Elbe/reanalysis-era5-single-levels_convective_precipitation,land_sea_mask,large_scale_precipitation,runoff,slope_of_sub_gridscale_orography,soil_type,total_column_water_vapour,volumetric_soil_water_layer_1,volumetric_soil_water_layer_2_*_*.nc', combine='by_coords')
@@ -11,47 +16,58 @@ glofas = xr.open_mfdataset('/Volumes/Seagate Backup Plus Drive/data/*/CEMS_ECMWF
 
 #To read a single shape by calling its index use the shape() method. The index is the shape's count from 0.
 # So to read the 8th shape record you would use its index which is 7.
-from functions.utils_floodmodel import get_basin_index, get_mask_of_basin, createPointList, shift_and_aggregate
 
+glofas = glofas.rename({'lon' : 'longitude'})
+glofas = glofas.rename({'lat': 'latitude'})
 
 import matplotlib.pyplot as plt
 
 elbe_area = get_mask_of_basin(glofas['dis24'].isel(time=0), kw_basins='Elbe')
 glofas = glofas.where(elbe_area, drop=True)
 
-#Why is there a need to interpolate?
+dis_map_mean = glofas['dis24'].mean('time')
+is_river = select_riverpoints(dis_map_mean)
+mask_river_in_catchment = is_river & elbe_area
+plt.imshow(mask_river_in_catchment.astype(int))
+plt.title('Elbe River')
+plt.show()
+plt.savefig('./images/Elbe/Elbe_river', dpi=600)
+plt.close()
+
+#Why is there a need to interpolate? --> Because there are different dimension sizes (era5 is 6x6 gridpoints whereas glofas provides 15x15 gridpoints
+#The following code would return an error:  era5 = era5.where(elbe_area, drop=True)
+
 #Interpolation is an estimation of a value within two known values in a sequence of values. Polynomial interpolation is a method of estimating values between known data points
-era5test = era5.where(elbe_area, drop=True)
-era5_basin = era5.interp(latitude=glofas.lat, longitude=glofas.lon).where(elbe_area, drop=True)
+era5 = era5.interp(latitude=glofas.latitude, longitude=glofas.longitude).where(elbe_area, drop=True)
 
-era5_basin['lsp'].isel(time=1).plot()
 
-#Visualizing the region after the spatial aggregation
+#Visualizing the region in 1999 after selecting the pertinent area
 glofas['dis24'].isel(time=1).plot()
-plt.savefig('./images/Elbe/Elbe_map', dpi=600)
+plt.savefig('./images/Elbe/1999_glofas_Elbe_map', dpi=600)
+plt.close()
 
 
+era5['lsp'].isel(time=1).plot()
+plt.savefig('./images/Elbe/era5_Elbe_map', dpi=600)
+plt.close()
 
 
-
-
-import matplotlib.pyplot as plt
-#Visualizing the discharge
+#Visualizing the mean discharge of the region
 dis_mean = glofas['dis24'].mean('time')
 dis_mean.plot()
 plt.title('Mean discharge in Elbe from 1999-2019')
-plt.savefig('./images/Elbe/dischargevisualization', dpi=600)
+plt.savefig('./images/Elbe/mean_discharge_map', dpi=600)
+plt.close()
 
 # Taking the average latitude and longitude if necessary
 #era5 = era5.mean(['latitude', 'longitude'])
 #glofas = glofas.mean(['lat', 'lon'])
-era5_basin = era5
-era5_basin = era5_basin.mean(['latitude', 'longitude'])
+era5 = era5.mean(['latitude', 'longitude'])
 
-era5_basin['lsp-4-11'] = shift_and_aggregate(era5_basin['lsp'], shift=4, aggregate=8)
-era5_basin['lsp-12-25'] = shift_and_aggregate(era5_basin['lsp'], shift=12, aggregate=14)
-era5_basin['lsp-26-55'] = shift_and_aggregate(era5_basin['lsp'], shift=26, aggregate=30)
-era5_basin['lsp-56-180'] = shift_and_aggregate(era5_basin['lsp'], shift=56, aggregate=125)
+era5['lsp-4-11'] = shift_and_aggregate(era5['lsp'], shift=4, aggregate=8)
+era5['lsp-12-25'] = shift_and_aggregate(era5['lsp'], shift=12, aggregate=14)
+era5['lsp-26-55'] = shift_and_aggregate(era5['lsp'], shift=26, aggregate=30)
+era5['lsp-56-180'] = shift_and_aggregate(era5['lsp'], shift=56, aggregate=125)
 
 # Visualizing the features
 # Converting to a dataarray
@@ -64,24 +80,40 @@ for f in era5visualization.features:
     plt.figure(figsize=(15, 5))
     era5visualization.sel(features=f).plot(ax=plt.gca())
     plt.savefig('./images/Elbe/' + str(f) + 'era5' + '.png', dpi=600, bbox_inches='tight')
+    plt.close()
 
 for f in glofasvisualization.features:
     plt.figure(figsize=(15, 5))
     glofasvisualization.sel(features=f).plot(ax=plt.gca())
     plt.savefig('./images/Elbe/glofasvisualization' + str(f) + '.png', dpi=600, bbox_inches='tight')
+    plt.close()
+
+#For a Specific time period in Glofas
+#glofas['dis24'].sel(time=slice('2013-5', '2013-6')).plot()
+
 
 # Creating the model
 import numpy as np
-import datetime as dt
-import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-import dask
 from dask.distributed import Client, LocalCluster
 
-cluster = LocalCluster(processes=True)  # n_workers=10, threads_per_worker=1,
-client = Client(cluster)  # memory_limit='16GB',
+cluster = LocalCluster()  # n_workers=10, threads_per_worker=1,
+
+#Connecting my client to the cluster does not work :((
+#client = Client("tcp://192.168.0.112:8786")  # memory_limit='16GB',
+client = Client(cluster)
+
+'''
+import dask.array as da
+x = da.random.random((40000,40000), chunks=(1000,1000))
+y = da.exp(x).sum()
+y.compute()
+'''
+
+scheduler = cluster.scheduler
+workers = cluster.workers
 
 import xarray as xr
 from dask.diagnostics import ProgressBar
@@ -91,45 +123,10 @@ X = era5
 
 from functions.utils_floodmodel import reshape_scalar_predictand
 
+#merges both values in time, since GLOFAS is daily while era5 is hourly data
 X, y = reshape_scalar_predictand(X, y)
 #Reshape this so that each point is a predictor
 
-"""
-def feature_preproc(era5, glofas, timeinit, timeend):
-
-    era5_features = era5
-
-    # interpolate to glofas grid
-    era5_features = era5_features.interp(latitude=glofas.latitude,
-                                         longitude=glofas.longitude)
-    # time subset
-    era5_features = era5_features.sel(time=slice(timeinit, timeend))
-    glofas = glofas.sel(time=slice(timeinit, timeend))
-
-    # select the point of interest
-    # poi = dict(latitude=48.403, longitude=15.615)  # krems (lower austria), outside the test dataset
-    poi = dict(latitude=48.35, longitude=13.95)  # point in upper austria
-
-    dummy = glofas['dis'].isel(time=0)
-    danube_catchment = get_mask_of_basin(dummy, kw_basins='Danube')
-    X = era5_features.where(danube_catchment).mean(['latitude', 'longitude'])
-
-    # select area of interest and average over space for all features
-    dis = glofas.interp(poi)
-    y = dis.diff('time', 1)  # compare predictors to change in discharge
-
-    shifts = range(1, 3)
-    notshift_vars = ['swvl1', 'tcwv', 'rtp_500-850']
-    shift_vars = [v for v in X.data_vars if not v in notshift_vars]
-
-    X = add_shifted_variables(X, shifts, variables=shift_vars)
-
-    Xda, yda = reshape_scalar_predictand(X, y)  # reshape into dimensions (time, feature)
-    return Xda, yda
-
-
-X, y = feature_preproc(era5, glofas, '2005', '2010')
-"""
 """PROBLEM"""
 # need to fix dimensionality problem, since GloFAS is a daily dataset, whereas ERA5 iss an hourly dataset. I would want to uppscale instead of downscale.
 X.features
@@ -153,7 +150,8 @@ plt.ylabel('density')
 plt.xlim([0, 150])
 plt.title('distribution of discharge')
 plt.plot()
-plt.savefig('../images/Elbe/distribution_dis.png', dpi=600, bbox_inches='tight')
+plt.savefig('./images/Elbe/distribution_dis.png', dpi=600, bbox_inches='tight')
+plt.close()
 
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
@@ -294,6 +292,7 @@ ax.set_yscale('log')
 plt.savefig('../images/Elbe/ElbeNNlearningcurve.png', dpi=600, bbox_inches='tight')
 
 yaml_string = m.model.to_yaml()
+import yaml
 
 with open('../models/keras-config.yml', 'w') as f:
     yaml.dump(yaml_string, f)

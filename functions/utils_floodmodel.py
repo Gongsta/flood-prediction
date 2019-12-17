@@ -33,6 +33,9 @@ glofas = glofas.sel(lat=glofasLat, lon=glofasLon)
 
 """
 
+def select_riverpoints(dis):
+    return (dis > 10)
+
 def createPointList(latMin, lonMin, latMax, lonMax, latList, lonList):
 
     #Lat is a list of all the available latitudes
@@ -101,12 +104,12 @@ def get_mask_of_basin(da, kw_basins='Danube'):
         xray coordinates. This only works for 1d latitude and longitude
         arrays.
         """
-        transform = transform_from_latlon(coords['lat'], coords['lon'])
-        out_shape = (len(coords['lat']), len(coords['lon']))
+        transform = transform_from_latlon(coords['latitude'], coords['longitude'])
+        out_shape = (len(coords['latitude']), len(coords['longitude']))
         raster = features.rasterize(shapes, out_shape=out_shape,
                                     fill=fill, transform=transform,
                                     dtype=float, **kwargs)
-        return xr.DataArray(raster, coords=coords, dims=('lat', 'lon'))
+        return xr.DataArray(raster, coords=coords, dims=('latitude', 'longitude'))
 
     # this shapefile is from natural earth data
     # http://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-1-states-provinces/
