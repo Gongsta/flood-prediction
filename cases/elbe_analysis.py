@@ -4,77 +4,36 @@ era5 = xr.open_mfdataset('/Volumes/Seagate Backup Plus Drive/data/Elbe/reanalysi
 
 glofas = xr.open_mfdataset('/Volumes/Seagate Backup Plus Drive/data/*/CEMS_ECMWF_dis24_*_glofas_v2.1.nc', combine='by_coords')
 
+
+#Data Processing
+
+#Selecting the area which only concern us with a shapefile
+
 #To read a single shape by calling its index use the shape() method. The index is the shape's count from 0.
 # So to read the 8th shape record you would use its index which is 7.
-import shapefile
-
-sf = shapefile.Reader("../basins/major_basins/Major_Basins_of_the_World.shp")
-
-shapes = sf.shapes()
-
-records = sf.records()
-
-basin = "Elbe"
+from functions.utils_floodmodel import get_basin_index, get_mask_of_basin, createPointList, shift_and_aggregate
 
 
-#function that returns the index of the basin based on its name
-def get_basin_index(basin, records):
+import matplotlib.pyplot as plt
 
-    for i in range(len(records)):
-        if basin == records[i][3]:
+elbe_area = get_mask_of_basin(glofas['dis24'].isel(time=0), kw_basins='Elbe')
+glofas = glofas.where(elbe_area, drop=True)
 
-            return i
+#Why is there a need to interpolate?
+#Interpolation is an estimation of a value within two known values in a sequence of values. Polynomial interpolation is a method of estimating values between known data points
+era5test = era5.where(elbe_area, drop=True)
+era5_basin = era5.interp(latitude=glofas.lat, longitude=glofas.lon).where(elbe_area, drop=True)
 
-index = get_basin_index(basin, records)
+era5_basin['lsp'].isel(time=1).plot()
 
-points = shapes[index].points
-
-bbox = shapes[index].bbox
-
-
-def createPointList(latMin, lonMin, latMax, lonMax, latList, lonList):
-
-    #Lat is a list of all the available latitudes
-    #Lon is a list of all the available longitudes
-
-    lat = []
-    lon = []
-
-    def find_nearest(array, value):
-        array = np.asarray(array)
-        idx = (np.abs(array - value)).argmin()
-        return array[idx]
-
-
-    for i in latList:
-        if i <= latMax and i >= latMin:
-            lat.append(i)
-
-    for i in lonList:
-        if i <= lonMax and i >= lonMin:
-            lon.append(i)
-
-
-    if not lat:
-        averageLat = (latMin + latMax)/2
-        lat.append(find_nearest(latList, averageLat))
-
-
-    if not lon:
-        averageLon = (lonMin + lonMax)/2
-        lon.append(find_nearest(lonList, averageLon))
+#Visualizing the region after the spatial aggregation
+glofas['dis24'].isel(time=1).plot()
+plt.savefig('./images/Elbe/Elbe_map', dpi=600)
 
 
 
-    return lat, lon
 
 
-lat, lon = createPointList(bbox[1], bbox[0], bbox[3], bbox[2], era5.latitude.values, era5.longitude.values)
-lat, lon = createPointList(bbox[1], bbox[0], bbox[3], bbox[2], glofas.lat.values,glofas.lon.values)
-
-
-#era5 = era5.sel(latitude=lat, longitude=lon)
-glofas = glofas.sel(lat=lat, lon=lon)
 
 import matplotlib.pyplot as plt
 #Visualizing the discharge
@@ -86,8 +45,13 @@ plt.savefig('./images/Elbe/dischargevisualization', dpi=600)
 # Taking the average latitude and longitude if necessary
 #era5 = era5.mean(['latitude', 'longitude'])
 #glofas = glofas.mean(['lat', 'lon'])
+era5_basin = era5
+era5_basin = era5_basin.mean(['latitude', 'longitude'])
 
-
+era5_basin['lsp-4-11'] = shift_and_aggregate(era5_basin['lsp'], shift=4, aggregate=8)
+era5_basin['lsp-12-25'] = shift_and_aggregate(era5_basin['lsp'], shift=12, aggregate=14)
+era5_basin['lsp-26-55'] = shift_and_aggregate(era5_basin['lsp'], shift=26, aggregate=30)
+era5_basin['lsp-56-180'] = shift_and_aggregate(era5_basin['lsp'], shift=56, aggregate=125)
 
 # Visualizing the features
 # Converting to a dataarray
@@ -310,14 +274,11 @@ hist = m.fit(X_train, y_train, X_valid, y_valid)
 # Summary of Model
 m.model.summary()
 
-m.model.save('elbemodel.h5')
+m.model.save('../models/elbemodel.h5')
 # save model
 from keras.utils import plot_model
 
 # plot Graph of Network
-from keras.utils import plot_model
-
-plot_model(m.model, to_file='./images/Elbe/model.png', show_shapes=True)
 
 h = hist.model.history
 
@@ -330,21 +291,25 @@ ax.set_ylabel('Loss')
 ax.set_xlabel('Epoch')
 plt.legend(['Training', 'Validation'])
 ax.set_yscale('log')
-plt.savefig('../images/Elbe/learningcurve.png', dpi=600, bbox_inches='tight')
+plt.savefig('../images/Elbe/ElbeNNlearningcurve.png', dpi=600, bbox_inches='tight')
 
 yaml_string = m.model.to_yaml()
 
-with open('./models/keras-config.yml', 'w') as f:
+with open('../models/keras-config.yml', 'w') as f:
     yaml.dump(yaml_string, f)
 
-with open('./models/model-config.yml', 'w') as f:
+with open('../models/model-config.yml', 'w') as f:
     yaml.dump(config, f, indent=4)
 
 from contextlib import redirect_stdout
 
-with open('./models/summary.txt', "w") as f:
+with open('./models/ElbeNNsummary.txt', "w") as f:
     with redirect_stdout(f):
         m.model.summary()
+
+from keras.utils import plot_model
+
+plot_model(m.model, to_file='./images/Elbe/ElbeNNmodel.png', show_shapes=True)
 
 from functions.plot import plot_multif_prediction
 
@@ -356,7 +321,7 @@ y_pred_train = generate_prediction_array(y_pred_train, y_train, forecast_range=1
 plt.plot(y_train, y_pred_train)
 
 y_pred_valid = m.predict(X_valid)
-y_pred_valid = generate_prediction_array(y_pred_valid, y_orig, forecast_range=14)
+y_pred_valid = generate_prediction_array(y_pred_valid, y_valid, forecast_range=14)
 
 y_pred_test = m.predict(X_test)
 y_pred_test = generate_prediction_array(y_pred_test, y_test, forecast_range=14)
@@ -372,13 +337,18 @@ plot_multif_prediction(y_pred_test, y_test, forecast_range=14, title=title)
 
 #Test case of Elbe basin during end of May-Beginning of June 2013 (flood happened in June 4th) to verify how well my model can predict flooding
 import pandas as pd
-time_range = pd.date_range('2013-05-15', periods=69)
+time_range = pd.date_range('2013-05-15', periods=30)
 y_case = y.loc[time_range]
 
+#Plotting the real time plot
 fig, ax = plt.subplots(figsize=(15, 5))
-color_scheme = ['g', 'cyan', 'magenta', 'k']
 plt.title('Case study Elbe Basin May/June 2013')
-
+ax.set_ylabel('river discharge [m$^3$/s]')
 y_case.to_pandas().plot(ax=ax, label='reanalysis', lw=4)
 
-# Update shapefile with Shapefile in order to include the predictions for each individual basin
+legendlabels = ['reanalysis', 'neural net']
+from matplotlib.lines import Line2D
+custom_lines = [Line2D([0], [0], color='b', lw=4),
+                Line2D([0], [0], color='firebrick', lw=2)]
+
+ax.legend(custom_lines, legendlabels, fontsize=11)

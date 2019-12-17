@@ -35,6 +35,10 @@ records = sf.records()
 #Insert the name of the basin
 basin = ""
 
+danube_catchment = get_mask_of_basin(glofas['dis24'].isel(time=0), kw_basins='Elbe')
+X = era5_features.where(danube_catchment).mean(['latitude', 'longitude'])
+
+
 
 #function that returns the index of the basin based on its name
 def get_basin_index(basin, records):

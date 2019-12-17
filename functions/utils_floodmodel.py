@@ -10,6 +10,74 @@ np.seterr(divide='ignore', invalid='ignore')
 
 """Contains methods for the flowmodel (transport model & local model)"""
 
+"""
+import shapefile
+
+sf = shapefile.Reader("../basins/major_basins/Major_Basins_of_the_World.shp")
+
+shapes = sf.shapes()
+
+records = sf.records()
+
+basin = "Elbe"
+
+index = get_basin_index(basin, records)
+
+points = shapes[index].points
+bbox = shapes[index].bbox
+lat, lon = createPointList(bbox[1], bbox[0], bbox[3], bbox[2], era5.latitude.values, era5.longitude.values)
+glofasLat, glofasLon = createPointList(bbox[1], bbox[0], bbox[3], bbox[2], glofas.lat.values,glofas.lon.values)
+
+#era5 = era5.sel(latitude=lat, longitude=lon)
+glofas = glofas.sel(lat=glofasLat, lon=glofasLon)
+
+"""
+
+def createPointList(latMin, lonMin, latMax, lonMax, latList, lonList):
+
+    #Lat is a list of all the available latitudes
+    #Lon is a list of all the available longitudes
+
+    lat = []
+    lon = []
+
+    def find_nearest(array, value):
+        array = np.asarray(array)
+        idx = (np.abs(array - value)).argmin()
+        return array[idx]
+
+
+    for i in latList:
+        if i <= latMax and i >= latMin:
+            lat.append(i)
+
+    for i in lonList:
+        if i <= lonMax and i >= lonMin:
+            lon.append(i)
+
+
+    if not lat:
+        averageLat = (latMin + latMax)/2
+        lat.append(find_nearest(latList, averageLat))
+
+
+    if not lon:
+        averageLon = (lonMin + lonMax)/2
+        lon.append(find_nearest(lonList, averageLon))
+
+
+
+    return lat, lon
+
+
+
+#function that returns the index of the basin based on its name
+def get_basin_index(basin, records):
+
+    for i in range(len(records)):
+        if basin == records[i][3]:
+
+            return i
 
 def get_mask_of_basin(da, kw_basins='Danube'):
     """Return a mask where all points outside the selected basin are False.
@@ -33,18 +101,18 @@ def get_mask_of_basin(da, kw_basins='Danube'):
         xray coordinates. This only works for 1d latitude and longitude
         arrays.
         """
-        transform = transform_from_latlon(coords['latitude'], coords['longitude'])
-        out_shape = (len(coords['latitude']), len(coords['longitude']))
+        transform = transform_from_latlon(coords['lat'], coords['lon'])
+        out_shape = (len(coords['lat']), len(coords['lon']))
         raster = features.rasterize(shapes, out_shape=out_shape,
                                     fill=fill, transform=transform,
                                     dtype=float, **kwargs)
-        return xr.DataArray(raster, coords=coords, dims=('latitude', 'longitude'))
+        return xr.DataArray(raster, coords=coords, dims=('lat', 'lon'))
 
     # this shapefile is from natural earth data
     # http://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-1-states-provinces/
-    shp2 = "/Users/stevengong/Desktop/data/Saudi_bassins/saudi_arabia_bassins.shp"
+    shp2 = "../basins/major_basins/Major_Basins_of_the_World.shp"
     basins = geopandas.read_file(shp2)
-    single_basin = basins.query("NAME == '"+kw_basins+"'").reset_index(drop=True)
+    single_basin = basins.query("NAME == '"+ kw_basins +"'").reset_index(drop=True)
     shapes = [(shape, n) for n, shape in enumerate(single_basin.geometry)]
 
     da['basins'] = rasterize(shapes, da.coords)
