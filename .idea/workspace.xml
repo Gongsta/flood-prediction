@@ -2,13 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e15b811c-8d99-4f22-9516-0891d521f49b" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cases/bangladesh.py" beforeDir="false" afterPath="$PROJECT_DIR$/cases/bangladesh.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cases/elbe_analysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/cases/elbe_analysis.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-7onjp5ws.dirlock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-c9i0quys.dirlock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-iljtj1aq.dirlock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-nczipe6g.dirlock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/datapreprocessing.py" beforeDir="false" afterPath="$PROJECT_DIR$/datapreprocessing.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/functions/utils_floodmodel.py" beforeDir="false" afterPath="$PROJECT_DIR$/functions/utils_floodmodel.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-58zcuope.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-j15expjv.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-k2yk87k2.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-www9_ldo.dirlock" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -19,19 +19,29 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/datapreprocessing.py">
+        <entry file="file://$PROJECT_DIR$/cases/elbe_analysis.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="432">
-              <caret line="27" lean-forward="true" selection-start-line="27" selection-end-line="27" />
+            <state relative-caret-position="508">
+              <caret line="133" selection-start-line="133" selection-end-line="136" selection-end-column="38" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/cases/elbe_analysis.py">
+        <entry file="file://$PROJECT_DIR$/cases/elbe_analysis_with_plots.py">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/images/GloFASv2.1_reanalysis_mean_flow_1979_2018_white_highres.png">
+          <provider selected="true" editor-type-id="images" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/cases/bangladesh.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="462">
-              <caret line="119" lean-forward="true" selection-start-line="119" selection-end-line="119" />
+            <state relative-caret-position="16">
+              <caret line="1" selection-start-line="1" selection-end-line="1" />
             </state>
           </provider>
         </entry>
@@ -39,8 +49,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/functions/utils_floodmodel.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="143">
-              <caret line="15" column="49" selection-start-line="15" selection-start-column="49" selection-end-line="15" selection-end-column="49" />
+            <state relative-caret-position="229">
+              <caret line="276" column="4" selection-start-line="276" selection-start-column="4" selection-end-line="276" selection-end-column="4" />
               <folding>
                 <element signature="e#0#15#0" expanded="true" />
               </folding>
@@ -110,7 +120,6 @@
         <option value="$PROJECT_DIR$/cases/elbe.py" />
         <option value="$PROJECT_DIR$/cases/saudiarabia.py" />
         <option value="$PROJECT_DIR$/cases/seine_analysis.py" />
-        <option value="$PROJECT_DIR$/cases/bangladesh.py" />
         <option value="$PROJECT_DIR$/model.py" />
         <option value="$PROJECT_DIR$/case_test.py" />
         <option value="$PROJECT_DIR$/country_bbox.py" />
@@ -119,7 +128,9 @@
         <option value="$PROJECT_DIR$/missing_file_verifier.py" />
         <option value="$PROJECT_DIR$/datapreprocessing.py" />
         <option value="$PROJECT_DIR$/functions/utils_floodmodel.py" />
+        <option value="$PROJECT_DIR$/cases/bangladesh.py" />
         <option value="$PROJECT_DIR$/cases/elbe_analysis.py" />
+        <option value="$PROJECT_DIR$/cases/elbe_analysis_with_plots.py" />
       </list>
     </option>
   </component>
@@ -202,7 +213,7 @@
     <frame x="1440" y="-83" width="1920" height="1080" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.1858873" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.1858873" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -212,28 +223,16 @@
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Version Control" order="7" weight="0.32891566" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="8" sideWeight="0.49964765" visible="true" weight="0.3148515" />
+      <window_info anchor="bottom" id="Version Control" order="7" weight="0.32871288" />
+      <window_info anchor="bottom" id="Terminal" order="8" sideWeight="0.49964765" weight="0.3148515" />
       <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.5003524" side_tool="true" weight="0.33373493" />
-      <window_info anchor="bottom" id="Python Console" order="10" sideWeight="0.49964765" weight="0.26732674" />
+      <window_info anchor="bottom" id="Python Console" order="10" sideWeight="0.49964765" visible="true" weight="0.26633662" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
     </layout>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/images/&lt;xarray.DataArray 'features' ()&gt;&#10;array('ro', dtype='&lt;U5')&#10;Coordinates:&#10;    features  &lt;U5 'ro'era5.png">
-      <provider selected="true" editor-type-id="images" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/images/danube/danube&lt;xarray.DataArray 'features' ()&gt;&#10;array('cp', dtype='&lt;U5')&#10;Coordinates:&#10;    features  &lt;U5 'cp'era5.png">
-      <provider selected="true" editor-type-id="images" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/images/&lt;xarray.DataArray 'features' ()&gt;&#10;array('slor', dtype='&lt;U5')&#10;Coordinates:&#10;    features  &lt;U5 'slor'era5.png">
-      <provider selected="true" editor-type-id="images" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/images/danube/distribution_dis.png">
-      <provider selected="true" editor-type-id="images" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/images/danube/glofasvisualization&lt;xarray.DataArray 'features' ()&gt;&#10;array('dis24', dtype='&lt;U5')&#10;Coordinates:&#10;    features  &lt;U5 'dis24'.png">
       <provider selected="true" editor-type-id="images" />
     </entry>
@@ -272,13 +271,6 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/images/model.png">
       <provider selected="true" editor-type-id="images" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/cases/bangladesh.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="84" selection-start-column="84" selection-end-column="84" />
-        </state>
-      </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/model.py">
       <provider selected="true" editor-type-id="text-editor">
@@ -407,21 +399,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/images/Elbe/&lt;xarray.DataArray 'features' ()&gt;&#10;array('lsp-12-25', dtype='&lt;U10')&#10;Coordinates:&#10;    features  &lt;U10 'lsp-12-25'era5.png">
-      <provider selected="true" editor-type-id="images" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/images/Elbe/&lt;xarray.DataArray 'features' ()&gt;&#10;array('lsm', dtype='&lt;U10')&#10;Coordinates:&#10;    features  &lt;U10 'lsm'era5.png">
-      <provider selected="true" editor-type-id="images" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/images/Elbe/&lt;xarray.DataArray 'features' ()&gt;&#10;array('lsp-56-180', dtype='&lt;U10')&#10;Coordinates:&#10;    features  &lt;U10 'lsp-56-180'era5.png">
-      <provider selected="true" editor-type-id="images" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/images/Elbe/1999_glofas_Elbe_map.png">
-      <provider selected="true" editor-type-id="images" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/images/Elbe/&lt;xarray.DataArray 'features' ()&gt;&#10;array('cp', dtype='&lt;U10')&#10;Coordinates:&#10;    features  &lt;U10 'cp'era5.png">
-      <provider selected="true" editor-type-id="images" />
-    </entry>
+    <entry file="file://$PROJECT_DIR$/images/Elbe/&lt;xarray.DataArray 'features' ()&gt;&#10;array('lsp-12-25', dtype='&lt;U10')&#10;Coordinates:&#10;    features  &lt;U10 'lsp-12-25'era5.png" />
+    <entry file="file://$PROJECT_DIR$/images/Elbe/&lt;xarray.DataArray 'features' ()&gt;&#10;array('lsm', dtype='&lt;U10')&#10;Coordinates:&#10;    features  &lt;U10 'lsm'era5.png" />
+    <entry file="file://$PROJECT_DIR$/images/Elbe/&lt;xarray.DataArray 'features' ()&gt;&#10;array('lsp-56-180', dtype='&lt;U10')&#10;Coordinates:&#10;    features  &lt;U10 'lsp-56-180'era5.png" />
+    <entry file="file://$PROJECT_DIR$/images/Elbe/&lt;xarray.DataArray 'features' ()&gt;&#10;array('cp', dtype='&lt;U10')&#10;Coordinates:&#10;    features  &lt;U10 'cp'era5.png" />
     <entry file="file:///opt/miniconda3/envs/flood_prediction/lib/python3.7/site-packages/distributed/deploy/local.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="327">
@@ -436,16 +417,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/images/Elbe/&lt;xarray.DataArray 'features' ()&gt;&#10;array('tcwv', dtype='&lt;U10')&#10;Coordinates:&#10;    features  &lt;U10 'tcwv'era5.png">
-      <provider selected="true" editor-type-id="images" />
-    </entry>
+    <entry file="file://$PROJECT_DIR$/images/Elbe/&lt;xarray.DataArray 'features' ()&gt;&#10;array('tcwv', dtype='&lt;U10')&#10;Coordinates:&#10;    features  &lt;U10 'tcwv'era5.png" />
     <entry file="file://$PROJECT_DIR$/images/Elbe/Elbe_map.png">
       <provider selected="true" editor-type-id="images" />
     </entry>
     <entry file="file://$PROJECT_DIR$/images/Elbe/dischargevisualization.png">
-      <provider selected="true" editor-type-id="images" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/images/Elbe/mean_discharge_map.png">
       <provider selected="true" editor-type-id="images" />
     </entry>
     <entry file="file://$PROJECT_DIR$/images/Elbe/era5_Elbe_map.png">
@@ -454,23 +430,6 @@
     <entry file="file://$PROJECT_DIR$/images/Elbe/glofasvisualization&lt;xarray.DataArray 'features' ()&gt;&#10;array('dis24', dtype='&lt;U5')&#10;Coordinates:&#10;    features  &lt;U5 'dis24'.png">
       <provider selected="true" editor-type-id="images" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/functions/utils_floodmodel.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="143">
-          <caret line="15" column="49" selection-start-line="15" selection-start-column="49" selection-end-line="15" selection-end-column="49" />
-          <folding>
-            <element signature="e#0#15#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/datapreprocessing.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="432">
-          <caret line="27" lean-forward="true" selection-start-line="27" selection-end-line="27" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///opt/miniconda3/envs/flood_prediction/lib/python3.7/contextlib.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="222">
@@ -478,12 +437,58 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/cases/elbe_analysis.py">
+    <entry file="file://$PROJECT_DIR$/images/Elbe/mean_discharge_map.png">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/images/Elbe/1999_glofas_Elbe_map.png">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/images/Elbe/Elbe_river.png">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file:///opt/miniconda3/envs/flood_prediction/lib/python3.7/site-packages/matplotlib/pyplot.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="462">
-          <caret line="119" lean-forward="true" selection-start-line="119" selection-end-line="119" />
+        <state relative-caret-position="222">
+          <caret line="2664" column="4" selection-start-line="2664" selection-start-column="4" selection-end-line="2664" selection-end-column="4" />
         </state>
       </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/datapreprocessing.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="432">
+          <caret line="27" selection-start-line="27" selection-end-line="27" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/functions/utils_floodmodel.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="229">
+          <caret line="276" column="4" selection-start-line="276" selection-start-column="4" selection-end-line="276" selection-end-column="4" />
+          <folding>
+            <element signature="e#0#15#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cases/bangladesh.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="16">
+          <caret line="1" selection-start-line="1" selection-end-line="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/images/GloFASv2.1_reanalysis_mean_flow_1979_2018_white_highres.png">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cases/elbe_analysis.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="508">
+          <caret line="133" selection-start-line="133" selection-end-line="136" selection-end-column="38" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cases/elbe_analysis_with_plots.py">
+      <provider selected="true" editor-type-id="text-editor" />
     </entry>
   </component>
 </project>

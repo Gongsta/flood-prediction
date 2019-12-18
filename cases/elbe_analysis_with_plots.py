@@ -1,0 +1,355 @@
+import sys
+sys.path.append('/Users/stevengong/Desktop/flood-prediction')
+from functions.utils_floodmodel import get_basin_index, get_mask_of_basin, createPointList, shift_and_aggregate, select_riverpoints
+import matplotlib
+#matplotlib.use('Agg')
+import xarray as xr
+
+#Loading our data
+#The open_mfdataset function automatically combines the many .nc files, the * represents the value that varies
+era5Loaded = xr.open_mfdataset('/Volumes/Seagate Backup Plus Drive/data/Elbe/reanalysis-era5-single-levels_convective_precipitation,land_sea_mask,large_scale_precipitation,runoff,slope_of_sub_gridscale_orography,soil_type,total_column_water_vapour,volumetric_soil_water_layer_1,volumetric_soil_water_layer_2_*_*.nc', combine='by_coords')
+
+glofasLoaded = xr.open_mfdataset('/Volumes/Seagate Backup Plus Drive/data/*/CEMS_ECMWF_dis24_*_glofas_v2.1.nc', combine='by_coords')
+
+
+era5 = era5Loaded
+glofas = glofasLoaded
+
+
+#Data Processing
+
+#To read a single shape by calling its index use the shape() method. The index is the shape's count from 0.
+# So to read the 8th shape record you would use its index which is 7.
+
+glofas = glofas.rename({'lon' : 'longitude'})
+glofas = glofas.rename({'lat': 'latitude'})
+
+import matplotlib.pyplot as plt
+
+elbe_area = get_mask_of_basin(glofas['dis24'].isel(time=0), kw_basins='Elbe')
+glofas = glofas.where(elbe_area, drop=True)
+era5 = era5.interp(latitude=glofas.latitude, longitude=glofas.longitude).where(elbe_area, drop=True)
+#Why is there a need to interpolate? --> Because there are different dimension sizes (era5 is 6x6 gridpoints whereas glofas provides 15x15 gridpoints
+#The following code would return an error:  era5 = era5.where(elbe_area, drop=True)
+#Interpolation is an estimation of a value within two known values in a sequence of values. Polynomial interpolation is a method of estimating values between known data points
+
+
+#River selection
+dis_map_mean = glofas['dis24'].mean('time')
+is_river = select_riverpoints(dis_map_mean)
+mask_river_in_catchment = is_river & elbe_area
+plt.imshow(mask_river_in_catchment.astype(int))
+plt.title('Elbe River')
+plt.savefig('./images/Elbe/Elbe_river', dpi=600)
+plt.clf()
+
+#Visualizing the region in 1999 after selecting the pertinent area
+glofas['dis24'].isel(time=1).plot()
+plt.savefig('./images/Elbe/1999_glofas_Elbe_map', dpi=600)
+plt.clf()
+
+
+era5['lsp'].isel(time=1).plot()
+plt.savefig('./images/Elbe/era5_Elbe_map', dpi=600)
+plt.clf()
+
+#Visualizing the region from 1999-2019
+dis_mean = glofas['dis24'].mean('time')
+dis_mean.plot()
+plt.title('Mean discharge in Elbe from 1999-2019')
+plt.savefig('./images/Elbe/average_discharge_map', dpi=600)
+plt.clf()
+
+# Taking the average latitude and longitude if necessary
+#era5 = era5.mean(['latitude', 'longitude'])
+#glofas = glofas.mean(['lat', 'lon'])
+era5 = era5.mean(['latitude', 'longitude'])
+glofas = glofas.mean(['latitude', 'longitude'])
+
+era5['lsp-4-11'] = shift_and_aggregate(era5['lsp'], shift=4, aggregate=8)
+era5['lsp-12-25'] = shift_and_aggregate(era5['lsp'], shift=12, aggregate=14)
+era5['lsp-26-55'] = shift_and_aggregate(era5['lsp'], shift=26, aggregate=30)
+era5['lsp-56-180'] = shift_and_aggregate(era5['lsp'], shift=56, aggregate=125)
+
+# Visualizing the features
+# Converting to a dataarray
+era5visualization = era5.to_array(dim='features').T
+glofasvisualization = glofas.to_array(dim='features').T
+
+import matplotlib.pyplot as plt
+
+for f in era5visualization.features:
+    plt.figure(figsize=(15, 5))
+    era5visualization.sel(features=f).plot(ax=plt.gca())
+    plt.savefig('./images/Elbe/' + str(f) + 'era5' + '.png', dpi=600, bbox_inches='tight')
+    plt.clf()
+
+for f in glofasvisualization.features:
+    plt.figure(figsize=(15, 5))
+    glofasvisualization.sel(features=f).plot(ax=plt.gca())
+    plt.savefig('./images/Elbe/waterdischarge.png', dpi=600, bbox_inches='tight')
+    plt.clf()
+
+
+# Visualizing the distribution of discharge
+import seaborn as sns
+
+sns.distplot(glofas['dis24'])
+plt.ylabel('density')
+plt.xlim([0, 150])
+plt.title('distribution of discharge')
+plt.plot()
+plt.savefig('./images/Elbe/distribution_of_dis.png', dpi=600, bbox_inches='tight')
+plt.close()
+#For a Specific time period in Glofas
+#glofas['dis24'].sel(time=slice('2013-5', '2013-6')).plot()
+
+
+# Creating the model
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from dask.distributed import Client, LocalCluster
+
+cluster = LocalCluster()  # n_workers=10, threads_per_worker=1,
+
+#Connecting my client to the cluster does not work :((
+#client = Client("tcp://192.168.0.112:8786")  # memory_limit='16GB',
+client = Client(cluster)
+
+'''
+import dask.array as da
+x = da.random.random((40000,40000), chunks=(1000,1000))
+y = da.exp(x).sum()
+y.compute()
+'''
+
+scheduler = cluster.scheduler
+workers = cluster.workers
+
+y = glofas['dis24']
+X = era5
+
+from functions.utils_floodmodel import reshape_scalar_predictand
+
+#merges both values in time, since GLOFAS is daily while era5 is hourly data
+X, y = reshape_scalar_predictand(X, y)
+#Reshape this so that each point is a predictor
+
+"""PROBLEM"""
+# need to fix dimensionality problem, since GloFAS is a daily dataset, whereas ERA5 iss an hourly dataset. I would want to uppscale instead of downscale.
+X.features
+
+# Splitting the dataset into training, test, and validation
+
+period_train = dict(time=slice('2005', '2012'))
+period_valid = dict(time=slice('2013', '2015'))
+period_test = dict(time=slice('2015', '2016'))
+
+X_train, y_train = X.loc[period_train], y.loc[period_train]
+X_valid, y_valid = X.loc[period_valid], y.loc[period_valid]
+X_test, y_test = X.loc[period_test], y.loc[period_test]
+
+
+
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+import keras
+from keras.layers.core import Dropout
+from keras.constraints import MinMaxNorm, nonneg
+
+
+def add_time(vector, time, name=None):
+    """Converts numpy arrays to xarrays with a time coordinate.
+
+    Parameters
+    ----------
+    vector : np.array
+        1-dimensional array of predictions
+    time : xr.DataArray
+        the return value of `Xda.time`
+
+    Returns
+    -------
+    xr.DataArray
+    """
+    return xr.DataArray(vector, dims=('time'), coords={'time': time}, name=name)
+
+
+class DenseNN(object):
+    def __init__(self, **kwargs):
+        self.output_dim = 1
+        self.xscaler = StandardScaler()
+        self.yscaler = StandardScaler()
+
+        model = keras.models.Sequential()
+        self.cfg = kwargs
+        hidden_nodes = self.cfg.get('hidden_nodes')
+
+        model.add(keras.layers.Dense(hidden_nodes[0],
+                                     activation='tanh'))
+        model.add(keras.layers.BatchNormalization())
+        model.add(Dropout(self.cfg.get('dropout', None)))
+
+        for n in hidden_nodes[1:]:
+            model.add(keras.layers.Dense(n, activation='tanh'))
+            model.add(keras.layers.BatchNormalization())
+            model.add(Dropout(self.cfg.get('dropout', None)))
+        model.add(keras.layers.Dense(self.output_dim,
+                                     activation='linear'))
+        opt = keras.optimizers.Adam()
+
+        model.compile(loss=self.cfg.get('loss'), optimizer=opt)
+        self.model = model
+
+        self.callbacks = [keras.callbacks.EarlyStopping(monitor='val_loss',
+                                                        min_delta=1e-2, patience=100, verbose=0, mode='auto',
+                                                        baseline=None, restore_best_weights=True), ]
+
+    def score_func(self, X, y):
+        """Calculate the RMS error
+
+        Parameters
+        ----------
+        xr.DataArrays
+        """
+        ypred = self.predict(X)
+        err_pred = ypred - y
+
+        # NaNs do not contribute to error
+        err_pred = err_pred.where(~np.isnan(err_pred), 0.)
+        return float(np.sqrt(xr.dot(err_pred, err_pred)))
+
+    def predict(self, Xda, name=None):
+        """Input and Output: xr.DataArray
+
+        Parameters
+        ----------
+        Xda : xr.DataArray
+            with coordinates (time,)
+        """
+        X = self.xscaler.transform(Xda.values)
+        y = self.model.predict(X).squeeze()
+        y = self.yscaler.inverse_transform(y)
+
+        y = add_time(y, Xda.time, name=name)
+        return y
+
+    def fit(self, X_train, y_train, X_valid, y_valid, **kwargs):
+        """
+        Input: xr.DataArray
+        Output: None
+        """
+
+        print(X_train.shape)
+        X_train = self.xscaler.fit_transform(X_train.values)
+        y_train = self.yscaler.fit_transform(
+            y_train.values.reshape(-1, self.output_dim))
+
+        X_valid = self.xscaler.transform(X_valid.values)
+        y_valid = self.yscaler.transform(
+            y_valid.values.reshape(-1, self.output_dim))
+
+        return self.model.fit(X_train, y_train,
+                              validation_data=(X_valid, y_valid),
+                              epochs=self.cfg.get('epochs', 1000),
+                              batch_size=self.cfg.get('batch_size'),
+                              callbacks=self.callbacks,
+                              verbose=0, **kwargs)
+
+
+config = dict(hidden_nodes=(64,),
+              dropout=0.25,
+              epochs=300,
+              batch_size=50,
+              loss='mse')
+
+m = DenseNN(**config)
+
+hist = m.fit(X_train, y_train, X_valid, y_valid)
+
+# Summary of Model
+m.model.summary()
+
+m.model.save('../models/elbemodel.h5')
+# save model
+from keras.utils import plot_model
+
+# plot Graph of Network
+
+h = hist.model.history
+
+# Plot training & validation loss value
+fig, ax = plt.subplots(figsize=(8, 4))
+ax.plot(h.history['loss'], label='loss')
+ax.plot(h.history['val_loss'], label='val_loss')
+plt.title('Learning curve')
+ax.set_ylabel('Loss')
+ax.set_xlabel('Epoch')
+plt.legend(['Training', 'Validation'])
+ax.set_yscale('log')
+plt.savefig('../images/Elbe/ElbeNNlearningcurve.png', dpi=600, bbox_inches='tight')
+
+yaml_string = m.model.to_yaml()
+import yaml
+
+with open('../models/keras-config.yml', 'w') as f:
+    yaml.dump(yaml_string, f)
+
+with open('../models/model-config.yml', 'w') as f:
+    yaml.dump(config, f, indent=4)
+
+from contextlib import redirect_stdout
+
+with open('./models/ElbeNNsummary.txt', "w") as f:
+    with redirect_stdout(f):
+        m.model.summary()
+
+from keras.utils import plot_model
+
+plot_model(m.model, to_file='./images/Elbe/ElbeNNmodel.png', show_shapes=True)
+
+from functions.plot import plot_multif_prediction
+
+from functions.utils_floodmodel import generate_prediction_array
+
+y_pred_train = m.predict(X_train)
+y_pred_train = generate_prediction_array(y_pred_train, y_train, forecast_range=14)
+
+plt.plot(y_train, y_pred_train)
+
+y_pred_valid = m.predict(X_valid)
+y_pred_valid = generate_prediction_array(y_pred_valid, y_valid, forecast_range=14)
+
+y_pred_test = m.predict(X_test)
+y_pred_test = generate_prediction_array(y_pred_test, y_test, forecast_range=14)
+
+from functions.plot import plot_multif_prediction
+
+title = 'Setting: Time-Delay Neural Net: 64 hidden nodes, dropout 0.25'
+plot_multif_prediction(y_pred_test, y_test, forecast_range=14, title=title)
+
+
+
+
+
+#Test case of Elbe basin during end of May-Beginning of June 2013 (flood happened in June 4th) to verify how well my model can predict flooding
+import pandas as pd
+time_range = pd.date_range('2013-05-15', periods=30)
+y_case = y.loc[time_range]
+
+#Plotting the real time plot
+fig, ax = plt.subplots(figsize=(15, 5))
+plt.title('Case study Elbe Basin May/June 2013')
+ax.set_ylabel('river discharge [m$^3$/s]')
+y_case.to_pandas().plot(ax=ax, label='reanalysis', lw=4)
+
+legendlabels = ['reanalysis', 'neural net']
+from matplotlib.lines import Line2D
+custom_lines = [Line2D([0], [0], color='b', lw=4),
+                Line2D([0], [0], color='firebrick', lw=2)]
+
+ax.legend(custom_lines, legendlabels, fontsize=11)
+
+'''
