@@ -1,77 +1,73 @@
+#Appending the path to the system so that the program can recognize the files
 import sys
 sys.path.append('/Users/stevengong/Desktop/flood-prediction')
-from functions.utils_floodmodel import get_basin_index, get_mask_of_basin, createPointList, shift_and_aggregate, select_riverpoints
-import matplotlib
-#matplotlib.use('Agg')
+from functions.floodmodel_utils import get_basin_mask, shift_and_aggregate
 import xarray as xr
+import numpy as np
 
-#Loading our data
-#The open_mfdataset function automatically combines the many .nc files, the * represents the value that varies
+#Creating a Dask local cluster for parallel computing (making the computations later on much faster)
+from dask.distributed import Client, LocalCluster
+
+cluster = LocalCluster()  #processes=4 threads=4, memory=8.59 GB
+client = Client(cluster)
+
+#This line of code connects the client to a remote cluster
+#client = Client("tcp://192.168.0.112:8786")  # memory_limit='16GB',
+
+
+#Loading our data located in a remote disk
+#The open_mfdataset function automatically combines the many .nc files thanks to the power of Dask, which opens the files in parallel, the file aren't loaded until .compute() is called
 era5Loaded = xr.open_mfdataset('/Volumes/Seagate Backup Plus Drive/data/Elbe/reanalysis-era5-single-levels_convective_precipitation,land_sea_mask,large_scale_precipitation,runoff,slope_of_sub_gridscale_orography,soil_type,total_column_water_vapour,volumetric_soil_water_layer_1,volumetric_soil_water_layer_2_*_*.nc', combine='by_coords')
-glofasLoaded = xr.open_mfdataset('/Volumes/Seagate Backup Plus Drive/data/*/CEMS_ECMWF_dis24_*_glofas_v2.1.nc', combine='by_coords')
+glofasLoaded = xr.open_mfdataset('/Volumes/Seagate Backup Plus Drive/data/*/CEMS_ECMWF_dis24_*_glofas_v2.1.nc', combine='by_coords', parallel=True)
 
-era5 = era5Loaded
-glofas = glofasLoaded
 
-#Data Processing
+#DATA PREPROCESSING
 
-#To read a single shape by calling its index use the shape() method. The index is the shape's count from 0.
-# So to read the 8th shape record you would use its index which is 7.
+#Doing this for debugging purposes
+glofas = glofasLoaded.copy()
+era5 = era5Loaded.copy()
 
+#Renaming the glofas coordinates from 'lon' to 'longitude' so that it is identical with era5's coordinates, which are spelled 'longitude' and 'latitude'
 glofas = glofas.rename({'lon' : 'longitude'})
 glofas = glofas.rename({'lat': 'latitude'})
 
-import matplotlib.pyplot as plt
 
-elbe_area = get_mask_of_basin(glofas['dis24'].isel(time=0), kw_basins='Elbe')
-glofas = glofas.where(elbe_area, drop=True)
-era5 = era5.interp(latitude=glofas.latitude, longitude=glofas.longitude).where(elbe_area, drop=True)
-#Why is there a need to interpolate? --> Because there are different dimension sizes (era5 is 6x6 gridpoints whereas glofas provides 15x15 gridpoints
-#The following code would return an error:  era5 = era5.where(elbe_area, drop=True)
-#Interpolation is an estimation of a value within two known values in a sequence of values. Polynomial interpolation is a method of estimating values between known data points
+"""At this point, the loaded GloFAS dataset includes all coordinates from around the world. We are only interested in looking at data from the Elbe basin, hence 
+we use the get_mask_of_basin function to drop all coordinates outside of the Elbe basin. Similarly, when era5 is downloaded, it is a square/rectangular area, so we need
+ to remove all data that is not part of the basin so we can use relevant and predictive data."""
+elbe_mask = get_basin_mask(glofas['dis24'].isel(time=0), 'Elbe')
+glofas = glofas.where(elbe_mask, drop=True)
+
+#We first need to interpolate the data because there are different dimension sizes (era5 is 6x6 gridpoints whereas glofas provides 15x15 gridpoints
+#The following code would return an error:  >> era5 = era5.where(elbe_area, drop=True)
+#IN CASE YOU DON'T KNOW: #nterpolation is an estimation of a value within two known values in a sequence of values.
+#Polynomial interpolation is a method of estimating values between known data points
+era5 = era5.interp(latitude=glofas.latitude, longitude=glofas.longitude).where(elbe_mask, drop=True)
 
 
-# Taking the average latitude and longitude if necessary
-#era5 = era5.mean(['latitude', 'longitude'])
-#glofas = glofas.mean(['lat', 'lon'])
+# Taking the average latitude and longitude of the area to reduce the dimensionality of our dataset
 era5 = era5.mean(['latitude', 'longitude'])
 glofas = glofas.mean(['latitude', 'longitude'])
 
+#Adding additional parameters so that our model can get better at predicting
 era5['lsp-4-11'] = shift_and_aggregate(era5['lsp'], shift=4, aggregate=8)
 era5['lsp-12-25'] = shift_and_aggregate(era5['lsp'], shift=12, aggregate=14)
 era5['lsp-26-55'] = shift_and_aggregate(era5['lsp'], shift=26, aggregate=30)
 era5['lsp-56-180'] = shift_and_aggregate(era5['lsp'], shift=56, aggregate=125)
 
 
-# Creating the model
-import numpy as np
 
-from dask.distributed import Client, LocalCluster
+y_orig = glofas['dis24']
+#Making a copy because y will be transformed to represent the variation of discharge. The model will be predicting the variation of discharge, not the quantity of discharge itself
+y = y_orig.copy()
+y = y.diff('time', 1)
 
-cluster = LocalCluster()  # n_workers=10, threads_per_worker=1,
-
-#Connecting my client to the cluster does not work :((
-#client = Client("tcp://192.168.0.112:8786")  # memory_limit='16GB',
-client = Client(cluster)
-
-'''
-import dask.array as da
-x = da.random.random((40000,40000), chunks=(1000,1000))
-y = da.exp(x).sum()
-y.compute()
-'''
-
-scheduler = cluster.scheduler
-workers = cluster.workers
-
-y = glofas['dis24']
 X = era5
 
-from functions.utils_floodmodel import reshape_scalar_predictand
-
+from functions.floodmodel_utils import reshape_scalar_predictand
 #merges both values in time, since GLOFAS is daily while era5 is hourly data
-X, y = reshape_scalar_predictand(X, y)
-#Reshape this so that each point is a predictor
+Xda, yda = reshape_scalar_predictand(X, y)
+
 
 """PROBLEM"""
 # need to fix dimensionality problem, since GloFAS is a daily dataset, whereas ERA5 iss an hourly dataset. I would want to uppscale instead of downscale.
@@ -79,22 +75,18 @@ X.features
 
 # Splitting the dataset into training, test, and validation
 
-period_train = dict(time=slice('2005', '2012'))
-period_valid = dict(time=slice('2013', '2015'))
-period_test = dict(time=slice('2015', '2016'))
+period_train = dict(time=slice('1999', '2005'))
+period_valid = dict(time=slice('2006', '2011'))
+period_test = dict(time=slice('2012', '2016'))
 
-X_train, y_train = X.loc[period_train], y.loc[period_train]
-X_valid, y_valid = X.loc[period_valid], y.loc[period_valid]
-X_test, y_test = X.loc[period_test], y.loc[period_test]
+#Train-test split
+X_train, y_train = Xda.loc[period_train], yda.loc[period_train]
+X_valid, y_valid = Xda.loc[period_valid], yda.loc[period_valid]
+X_test, y_test = Xda.loc[period_test], yda.loc[period_test]
 
-
-
-from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 import keras
 from keras.layers.core import Dropout
-from keras.constraints import MinMaxNorm, nonneg
-
 
 def add_time(vector, time, name=None):
     """Converts numpy arrays to xarrays with a time coordinate.
@@ -198,17 +190,17 @@ class DenseNN(object):
 config = dict(hidden_nodes=(64,),
               dropout=0.25,
               epochs=300,
-              batch_size=50,
+              batch_size=90,
               loss='mse')
 
 m = DenseNN(**config)
-
 hist = m.fit(X_train, y_train, X_valid, y_valid)
+
 
 # Summary of Model
 m.model.summary()
 
-m.model.save('../models/elbemodel.h5')
+m.model.save('./models/elbemodel.h5')
 # save model
 from keras.utils import plot_model
 
@@ -225,15 +217,15 @@ ax.set_ylabel('Loss')
 ax.set_xlabel('Epoch')
 plt.legend(['Training', 'Validation'])
 ax.set_yscale('log')
-plt.savefig('../images/Elbe/ElbeNNlearningcurve.png', dpi=600, bbox_inches='tight')
+plt.savefig('./images/Elbe/ElbeNNlearningcurve.png', dpi=600, bbox_inches='tight')
 
 yaml_string = m.model.to_yaml()
 import yaml
 
-with open('../models/keras-config.yml', 'w') as f:
+with open('./models/keras-config.yml', 'w') as f:
     yaml.dump(yaml_string, f)
 
-with open('../models/model-config.yml', 'w') as f:
+with open('./models/model-config.yml', 'w') as f:
     yaml.dump(config, f, indent=4)
 
 from contextlib import redirect_stdout
@@ -251,29 +243,24 @@ from functions.plot import plot_multif_prediction
 from functions.utils_floodmodel import generate_prediction_array
 
 y_pred_train = m.predict(X_train)
-y_pred_train = generate_prediction_array(y_pred_train, y_train, forecast_range=14)
-
-plt.plot(y_train, y_pred_train)
+y_pred_train = generate_prediction_array(y_pred_train, y_orig, forecast_range=14)
 
 y_pred_valid = m.predict(X_valid)
-y_pred_valid = generate_prediction_array(y_pred_valid, y_valid, forecast_range=14)
+y_pred_valid = generate_prediction_array(y_pred_valid, y_orig, forecast_range=14)
 
 y_pred_test = m.predict(X_test)
-y_pred_test = generate_prediction_array(y_pred_test, y_test, forecast_range=14)
+y_pred_test = generate_prediction_array(y_pred_test, y_orig, forecast_range=14)
 
 from functions.plot import plot_multif_prediction
-
-title = 'Setting: Time-Delay Neural Net: 64 hidden nodes, dropout 0.25'
-plot_multif_prediction(y_pred_test, y_test, forecast_range=14, title=title)
-
-
-
+title='Setting: Time-Delay Neural Net: 64 hidden nodes, dropout 0.25'
+plot_multif_prediction(y_pred_test, y_orig, forecast_range=14, title=title)
+plt.savefig('./images/Elbe/multif_prediction.png', dpi=600)
 
 
 #Test case of Elbe basin during end of May-Beginning of June 2013 (flood happened in June 4th) to verify how well my model can predict flooding
 import pandas as pd
 time_range = pd.date_range('2013-05-15', periods=30)
-y_case = y.loc[time_range]
+y_case = y_orig.loc[time_range]
 
 #Plotting the real time plot
 fig, ax = plt.subplots(figsize=(15, 5))
@@ -288,4 +275,3 @@ custom_lines = [Line2D([0], [0], color='b', lw=4),
 
 ax.legend(custom_lines, legendlabels, fontsize=11)
 
-'''

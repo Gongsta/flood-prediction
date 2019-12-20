@@ -1,3 +1,5 @@
+"""Contains utilities related to the flood model (data processing,saving prediction, generating prediction, etc.) """
+
 import warnings
 import numpy as np
 import pandas as pd
@@ -34,6 +36,46 @@ glofas = glofas.sel(lat=glofasLat, lon=glofasLon)
 """
 
 def select_riverpoints(dis):
+    """Returns a DataArray where all values that are of a discharge of 10 or under is false.
+
+        Parameters:
+        -----------
+        da : xr.DataArray
+            contains the coordinates
+        kw_basins : str
+            Name of the basin in the basins dataset shapefile
+
+        Returns
+        -------
+        da : xr.DataArray
+            the transformed dataArray with all points outside of the basin identified as False.
+
+        Examples
+        --------
+        # Obtaining the mask of the Elbe basin
+        >> glofas = xr.open_mfdataset('/Volumes/Seagate Backup Plus Drive/data/*/CEMS_ECMWF_dis24_*_glofas_v2.1.nc', combine='by_coords')
+        >> elbe_mask = get_basin_mask(glofas['dis24'].isel(time=0), 'Elbe')
+        >> elbe_mask
+
+        <xarray.DataArray 'basins' (latitude: 1500, longitude: 3600)>
+    array([[False, False, False, ..., False, False, False],
+           [False, False, False, ..., False, False, False],
+           [False, False, False, ..., False, False, False],
+           ...,
+           [False, False, False, ..., False, False, False],
+           [False, False, False, ..., False, False, False],
+           [False, False, False, ..., False, False, False]])
+    Coordinates:
+      * longitude  (longitude) float64 -179.9 -179.8 -179.8 ... 179.8 179.9 180.0
+      * latitude   (latitude) float64 89.95 89.85 89.75 ... -59.75 -59.85 -59.95
+        time       datetime64[ns] 1999-01-01
+
+
+        #Applying the mask of the basin by dropping all datasets outside of the basin
+        >> glofas = glofas.where(elbe_mask, drop=True)
+
+        """
+
     return (dis > 10)
 
 def createPointList(latMin, lonMin, latMax, lonMax, latList, lonList):
@@ -82,15 +124,46 @@ def get_basin_index(basin, records):
 
             return i
 
-def get_mask_of_basin(da, kw_basins='Danube'):
-    """Return a mask where all points outside the selected basin are False.
+
+def get_basin_mask(da, basin_name):
+    """Returns a mask where all points outside the selected basin are False.
 
     Parameters:
     -----------
     da : xr.DataArray
         contains the coordinates
     kw_basins : str
-        identifier of the basin in the basins dataset
+        Name of the basin in the basins dataset shapefile
+
+    Returns
+    -------
+    da : xr.DataArray
+        the transformed dataArray with all points outside of the basin identified as False.
+
+    Examples
+    --------
+    # Obtaining the mask of the Elbe basin
+    >> glofas = xr.open_mfdataset('/Volumes/Seagate Backup Plus Drive/data/*/CEMS_ECMWF_dis24_*_glofas_v2.1.nc', combine='by_coords')
+    >> elbe_mask = get_basin_mask(glofas['dis24'].isel(time=0), 'Elbe')
+    >> elbe_mask
+
+    <xarray.DataArray 'basins' (latitude: 1500, longitude: 3600)>
+array([[False, False, False, ..., False, False, False],
+       [False, False, False, ..., False, False, False],
+       [False, False, False, ..., False, False, False],
+       ...,
+       [False, False, False, ..., False, False, False],
+       [False, False, False, ..., False, False, False],
+       [False, False, False, ..., False, False, False]])
+Coordinates:
+  * longitude  (longitude) float64 -179.9 -179.8 -179.8 ... 179.8 179.9 180.0
+  * latitude   (latitude) float64 89.95 89.85 89.75 ... -59.75 -59.85 -59.95
+    time       datetime64[ns] 1999-01-01
+
+
+    #Applying the mask of the basin by dropping all datasets outside of the basin
+    >> glofas = glofas.where(elbe_mask, drop=True)
+
     """
     def transform_from_latlon(lat, lon):
         lat = np.asarray(lat)
@@ -115,7 +188,7 @@ def get_mask_of_basin(da, kw_basins='Danube'):
     # http://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-1-states-provinces/
     shp2 = "../basins/major_basins/Major_Basins_of_the_World.shp"
     basins = geopandas.read_file(shp2)
-    single_basin = basins.query("NAME == '"+ kw_basins +"'").reset_index(drop=True)
+    single_basin = basins.query("NAME == '"+ basin_name +"'").reset_index(drop=True)
     shapes = [(shape, n) for n, shape in enumerate(single_basin.geometry)]
 
     da['basins'] = rasterize(shapes, da.coords)
@@ -126,7 +199,7 @@ def get_mask_of_basin(da, kw_basins='Danube'):
 def select_upstream(mask_river_in_catchment, lat, lon, basin='Danube'):
     """Return a mask containing upstream river gridpoints.
 
-    Parameters
+    Arguments
     ----------
     mask_river_in_catchment : xr.DataArray
         array that is True only for river gridpoints within a certain catchment
@@ -151,7 +224,7 @@ def select_upstream(mask_river_in_catchment, lat, lon, basin='Danube'):
     da = mask_river_in_catchment.load()
     is_west = (~np.isnan(da.where(da.longitude <= lon))).astype(bool)
 
-    mask_basin = get_mask_of_basin(da, kw_basins=basin)
+    mask_basin = get_basin_mask(da, basin_name=basin)
 
     nearby_mask = da*0.
     nearby_mask.loc[dict(latitude=slice(lat+1.5, lat-1.5),
@@ -275,6 +348,54 @@ def cluster_by_discharge(dis_2d, bin_edges):
 
 
 def reshape_scalar_predictand(X_dis, y):
+    """Reshape, merge predictor/predictand in time, drop nans.
+
+    Parameters
+    ----------
+    X_dis : xr.Dataset
+        variables: time shifted predictors (name irrelevant)
+        coords: time, latitude, longitude
+    y : xr.DataArray
+        coords: time
+    """
+    if isinstance(X_dis, xr.Dataset):
+        X_dis = X_dis.to_array(dim='var_dimension')
+
+    # stack -> seen as one dimension for the model
+    stack_dims = [a for a in X_dis.dims if a != 'time']  # all except time
+    X_dis = X_dis.stack(features=stack_dims)
+    Xar = X_dis.dropna('features', how='all')  # drop features that only contain NaN
+
+    if isinstance(y, xr.Dataset):
+        if len(y.data_vars) > 1:
+            warnings.warn('Supplied `y` with more than one variable.'
+                          'Which is the predictand? Supply only one!')
+        for v in y:
+            y = y[v]  # use the first
+            break
+
+    yar = y
+    if len(yar.dims) > 1:
+        raise NotImplementedError('y.dims: '+str(yar.dims) +
+                                  ' Supply only one predictand dimension, e.g. `time`!')
+
+    # to be sure that these dims are not in the output
+    for coord in ['latitude', 'longitude']:
+        if coord in yar.coords:
+            yar = yar.drop(coord)
+
+    # merge times
+    yar.coords['features'] = 'predictand'
+    Xy = xr.concat([Xar, yar], dim='features')  # maybe merge instead concat?
+    Xyt = Xy.dropna('time', how='any')  # drop rows with nan values
+
+    Xda = Xyt[:, :-1]  # last column is predictand
+    yda = Xyt[:, -1].drop('features')  # features was only needed in merge
+    return Xda, yda
+
+
+
+def reshape_scalar_predictand_dask(X_dis, y):
     """Reshape, merge predictor/predictand in time, drop nans.
 
     Parameters
@@ -614,6 +735,9 @@ def multi_forecast_case_study(pipe_case, x, y):
 
 
 def multi_forecast_case_study_tdnn(pipe_case):
+
+    # THIS CODE NEEDS FIXING
+
     """
     Convenience function for predicting discharge via the pre-trained input pipe.
     Loads glofas forecast_rerun data from a in-function set path, used to evaluate
@@ -629,11 +753,17 @@ def multi_forecast_case_study_tdnn(pipe_case):
     -------
     xr.DataArray (3 times)
     """
-    features_2013 = xr.open_dataset('../../data/features_xy.nc')
-    y = features_2013['dis']
+
+    features_2013 = xr.open_dataset('../data/features_xy.nc')
+    y_orig = features_2013['dis']
+    y = y_orig.copy()
     X = features_2013.drop(['dis', 'dis_diff'])
 
-    X, y = reshape_scalar_predictand(X, y)
+    #Try removing this code and see if it still works?
+    y = y.diff('time', 1)
+
+    Xda, yda = reshape_scalar_predictand(X, y)
+
 
     multif_list = []
     multifrerun_list = []
@@ -655,7 +785,7 @@ def multi_forecast_case_study_tdnn(pipe_case):
             date_end = '2013-06-28'
             fr_dir = '2013052900'
 
-        X_case = X.sel(time=slice(date_init, date_end)).copy()
+        X_case = Xda.sel(time=slice(date_init, date_end)).copy()
 
         # prediction start from every nth day
         # if in doubt, leave n = 1 !!!
@@ -663,23 +793,22 @@ def multi_forecast_case_study_tdnn(pipe_case):
         X_pred = X_case[::n].copy()
         y_pred = pipe_case.predict(X_pred)
 
-        multif_case = generate_prediction_array(y_pred, y, forecast_range=30)
+        multif_case = generate_prediction_array(y_pred, y_orig, forecast_range=30)
         multif_case.num_of_forecast.values = [forecast]
         multif_list.append(multif_case)
 
         # add glofas forecast rerun data
         # glofas forecast rerun data
-        frerun = xr.open_mfdataset(f'../../data/glofas-freruns/{fr_dir}/glof*',
-                                   combine='by_coords')
-        fr = frerun['dis'].sel(lon=slice(13.9, 14.), lat=slice(48.4, 48.3))
-        fr = fr.drop(labels=['lat', 'lon']).squeeze()
-        multifrerun_list.append(fr)
+        # frerun = xr.open_dataset('/Users/stevengong/Desktop/data/glofas_freruns_case_study.nc')
+        # fr = frerun['dis'].sel(lon=slice(13.9, 14.), lat=slice(48.4, 48.3))
+        # fr = fr.drop(labels=['lat', 'lon']).squeeze()
+        # multifrerun_list.append(fr)
 
     # merge forecasts into one big array
     date_init = '2013-05-18'
     date_end = '2013-06-28'
-    y_case_fin = y.sel(time=slice(date_init, date_end)).copy()
-    X_case_multi_core = X.sel(time=slice(date_init, date_end)
+    y_case_fin = yda.sel(time=slice(date_init, date_end)).copy()
+    X_case_multi_core = Xda.sel(time=slice(date_init, date_end)
                               ).isel(features=1).copy().drop('features')*np.nan
 
     X_list = []
@@ -691,16 +820,16 @@ def multi_forecast_case_study_tdnn(pipe_case):
     X_multif_fin.name = 'prediction'
 
     X_list = []
-    for frr in multifrerun_list:
-        X_iter = X_case_multi_core.copy()
-        ens_list = []
-        for fr_num in frr.ensemble:
-            fr_iter = frr.sel(ensemble=fr_num)
-            X_ens_iter = X_iter.copy()
-            X_ens_iter.loc[{'time': frr.time.values}] = fr_iter.values
-            ens_list.append(X_ens_iter)
-        ens_da = xr.concat(ens_list, dim='ensemble')
-        X_list.append(ens_da)
-    X_multifr_fin = xr.concat(X_list, dim='num_of_forecast')
-    X_multifr_fin.name = 'forecast rerun'
-    return X_multif_fin, X_multifr_fin, y_case_fin
+    # for frr in multifrerun_list:
+    #     X_iter = X_case_multi_core.copy()
+    #     ens_list = []
+    #     for fr_num in frr.ensemble:
+    #         fr_iter = frr.sel(ensemble=fr_num)
+    #         X_ens_iter = X_iter.copy()
+    #         X_ens_iter.loc[{'time': frr.time.values}] = fr_iter.values
+    #         ens_list.append(X_ens_iter)
+    #     ens_da = xr.concat(ens_list, dim='ensemble')
+    #     X_list.append(ens_da)
+    # X_multifr_fin = xr.concat(X_list, dim='num_of_forecast')
+    # X_multifr_fin.name = 'forecast rerun'
+    return X_multif_fin, y_case_fin

@@ -3,6 +3,7 @@ channels:
   - conda-forge
   - defaults
 dependencies:
+  - awscli
   - cartopy
   - cdsapi
   - dask
@@ -33,6 +34,7 @@ dependencies:
   - pyproj
   - py-xgboost
   - rasterio
+  - s3fs
   - scikit-learn
   - scipy
   - seaborn

@@ -12,3 +12,4 @@ glofas = glofas.rename({'lon':'longitude'})
 glofas = glofas.rename({'lat': 'latitude'})
 
 bangladesh_catchment = get_mask_of_basin(glofas['dis24'].isel(time=0), 'Dhaka')
+glofas = glofas.where(bangladesh_catchment, drop=True)

@@ -1,190 +1,44 @@
-"""Code to run for people trying to replicate this"""
-
-#Data extraction
-
-
-#Saving our API key so that we can use Climate Data Store API to extract data
-UID = '26343'
-API_key = 'b61b1b28-a04b-4cb3-acb1-b48775702011'
-
-import os
-with open(os.path.join(os.path.expanduser('~'), '.cdsapirc2'), 'w') as f:
-    f.write('url: https://cds.climate.copernicus.eu/api/v2\n')
-    f.write(f'key: {UID}:{API_key}')
-
-
-#Adding functions to our directory so we can use other functions
-import sys
-sys.path.append('./')
-from functions.data_download import CDS_Dataset
-
-
-#Downloading ERA5 Dataset
-
-ds = CDS_Dataset(dataset_name='reanalysis-era5-single-levels',
-                 save_to_folder='../../data/Danube'  # path to where datasets shall be stored
-                )
-
-# define areas of interest (N/W/S/E)
-danube=[50, 7, 47, 20]
-
-# define time frame of the downlaod
-year_start = 2005
-year_end = 2010
-month_start = 1
-month_end = 12
-
-# define request variables
-request = dict(product_type='reanalysis',
-               format='netcdf',
-               area=danube,
-               variable=['convective_precipitation','land_sea_mask','large_scale_precipitation',
-            'runoff','slope_of_sub_gridscale_orography','soil_type',
-            'total_column_water_vapour','volumetric_soil_water_layer_1','volumetric_soil_water_layer_2'],
-               )
-
-#Sending the request
-ds.get(years = [str(y) for y in range(year_start, year_end+1)],
-       months = [str(a).zfill(2) for a in range(month_start, month_end+1)],
-       request = request,
-       N_parallel_requests = 12)
-
-
-
-#Code for downloading Glofas Data
-import cdsapi
-
-c = cdsapi.Client()
-
-c.retrieve(
-    'cems-glofas-historical',
-    {
-        'format':'zip',
-        'year':[
-            '2005','2006','2007','2008','2009','2010','2011','2012','2013','2014','2015','2016'
-        ],
-        'variable':'River discharge',
-        'month':[
-            '01','02','03',
-            '04','05','06',
-            '07','08','09',
-            '10','11','12'
-        ],
-        'day':[
-            '01','02','03',
-            '04','05','06',
-            '07','08','09',
-            '10','11','12',
-            '13','14','15',
-            '16','17','18',
-            '19','20','21',
-            '22','23','24',
-            '25','26','27',
-            '28','29','30',
-            '31'
-        ],
-        'dataset':'Consolidated reanalysis',
-        'version':'2.1'
-    },
-    'download.zip')
-
-
-
 import xarray as xr
+from functions.utils_floodmodel import get_basin_index, get_mask_of_basin, createPointList, shift_and_aggregate, select_riverpoints
+import numpy as np
 
+from dask.distributed import Client, LocalCluster
 
-import xarray as xr
+cluster = LocalCluster()  # n_workers=10, threads_per_worker=1,
+client = Client(cluster)
+
+print(client)
 #The open_mfdataset function automatically combines the many .nc files, the * represents the value that varies
-era5 = xr.open_mfdataset('../../data/Danube/reanalysis-era5-single-levels_convective_precipitation,land_sea_mask,large_scale_precipitation,runoff,slope_of_sub_gridscale_orography,soil_type,total_column_water_vapour,volumetric_soil_water_layer_1,volumetric_soil_water_layer_2_*_*.nc', combine='by_coords')
+era5Loaded = xr.open_mfdataset('/Volumes/Seagate Backup Plus Drive/data/Danube/reanalysis-era5-single-levels_convective_precipitation,land_sea_mask,large_scale_precipitation,runoff,slope_of_sub_gridscale_orography,soil_type,total_column_water_vapour,volumetric_soil_water_layer_1,volumetric_soil_water_layer_2_*_*.nc', combine='by_coords')
 
-glofas = xr.open_mfdataset('../../data/*/CEMS_ECMWF_dis24_*_glofas_v2.1.nc', combine='by_coords')
+glofasLoaded = xr.open_mfdataset('/Volumes/Seagate Backup Plus Drive/data/*/CEMS_ECMWF_dis24_*_glofas_v2.1.nc', combine='by_coords')
 
+era5 = era5Loaded
+glofas = glofasLoaded
+
+
+#Data Processing
 
 #To read a single shape by calling its index use the shape() method. The index is the shape's count from 0.
 # So to read the 8th shape record you would use its index which is 7.
-import shapefile
 
-sf = shapefile.Reader("../data/Saudi_bassins/saudi_arabia_bassins.shp")
-
-shapes = sf.shapes()
-
-"""
-#View the characteristics of the shape file
-for name in dir(shapes[3]):
-    if not name.startswith('_'):
-        print(name)
-
-"""
-#The shapefile we are using has 5 attributes:
-#'bbox'
-#'parts'
-#'points'
-#'shapeType'
-#'shapeTypeName'
-#Read the following documentation to learn more
-
-#Creating an array of all the basins in the world
-basins = []
-for n in range(len(shapes)):
-    basins.append(shapes[n].bbox)
-
-
-latitudeList = []
-longitudeList = []
-for point in basins:
-    latitudeList.append(point[0])
-    longitudeList.append(point[1])
-
-
-from functions.utils_floodmodel import get_mask_of_basin, add_shifted_variables, reshape_scalar_predictand
-
-
-'''
-#Get mask of basin Return a mask where all points outside the selected basin are False.
-danube_catchment = get_mask_of_basin(glofas['dis'].isel(time=0))
-dis = glofas['dis'].where(danube_catchment)
-'''
-
-
-
-#[50, 7, 47, 20]
-
-tempLat = glofas.lat.values
-lat = []
-tempLon = glofas.lon.values
-lon = []
-for i in tempLat:
-    if i<=50 and i>=47:
-        lat.append(i)
-
-for i in tempLon:
-    if i<=20 and i>=7:
-        lon.append(i)
-
-
-
-glofas = glofas.sel(lat=lat, lon=lon)
-
-#Taking the average latitude and longitude if necessary
-era5 = era5.mean(['latitude','longitude'])
-glofas = glofas.mean(['lat','lon'])
-
-#Visualizing the features
-#Converting to a dataarray
-era5visualization = era5.to_array(dim='features').T
-glofasvisualization = glofas.to_array(dim='features').T
+glofas = glofas.rename({'lon' : 'longitude'})
+glofas = glofas.rename({'lat': 'latitude'})
 
 import matplotlib.pyplot as plt
-for f in era5visualization.features:
-    plt.figure(figsize=(15,5))
-    era5visualization.sel(features=f).plot(ax=plt.gca())
-    plt.savefig('../images/danube/'+str(f)+ 'era5'+'.png', dpi=600, bbox_inches='tight')
 
+danube_area = get_mask_of_basin(glofas['dis24'].isel(time=0), kw_basins='Danube')
+glofas = glofas.where(danube_area, drop=True)
+era5 = era5.interp(latitude=glofas.latitude, longitude=glofas.longitude).where(danube_area, drop=True)
 
-for f in glofasvisualization.features:
-    plt.figure(figsize=(15,5))
-    glofasvisualization.sel(features=f).plot(ax=plt.gca())
-    plt.savefig('../images/danube/glofasvisualization'+str(f)+'.png', dpi=600, bbox_inches='tight')
+era5 = era5.mean(['latitude', 'longitude'])
+glofas = glofas.mean(['latitude', 'longitude'])
+
+era5['lsp-4-11'] = shift_and_aggregate(era5['lsp'], shift=4, aggregate=8)
+era5['lsp-12-25'] = shift_and_aggregate(era5['lsp'], shift=12, aggregate=14)
+era5['lsp-26-55'] = shift_and_aggregate(era5['lsp'], shift=26, aggregate=30)
+era5['lsp-56-180'] = shift_and_aggregate(era5['lsp'], shift=56, aggregate=125)
+
 
 
 #Creating the model
@@ -193,14 +47,6 @@ import datetime as dt
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-
-import dask
-from dask.distributed import Client, LocalCluster
-cluster = LocalCluster(processes=True) #n_workers=10, threads_per_worker=1,
-client = Client(cluster)  # memory_limit='16GB',
-
-import xarray as xr
-from dask.diagnostics import ProgressBar
 
 y = glofas['dis24']
 X = era5
@@ -260,15 +106,6 @@ X_test, y_test = X.loc[period_test], y.loc[period_test]
 
 
 """"""
-#Visualizing the distribution of discharge
-import seaborn as sns
-sns.distplot(y)
-plt.ylabel('density')
-plt.xlim([0, 150])
-plt.title('distribution of discharge')
-plt.plot()
-plt.savefig('..images/danube/distribution_dis.png', dpi=600, bbox_inches='tight')
-
 
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
@@ -401,7 +238,7 @@ from keras.utils import plot_model
 
 #plot Graph of Network
 from keras.utils import plot_model
-plot_model(m.model, to_file='../images/danube/model.png', show_shapes=True)
+plot_model(m.model, to_file='./images/danube/model.png', show_shapes=True)
 
 
 h = hist.model.history
@@ -415,34 +252,10 @@ ax.set_ylabel('Loss')
 ax.set_xlabel('Epoch')
 plt.legend(['Training', 'Validation'])
 ax.set_yscale('log')
-plt.savefig('../images/danube/learningcurve.png', dpi=600, bbox_inches='tight')
+plt.savefig('./images/danube/learningcurve.png', dpi=600, bbox_inches='tight')
 
-
-yaml_string = m.model.to_yaml()
-
-
-with open('../models/keras-config.yml', 'w') as f:
-    yaml.dump(yaml_string, f)
-
-with open('../models/model-config.yml', 'w') as f:
-    yaml.dump(config, f, indent=4)
-
-from contextlib import redirect_stdout
-with open('../models/summary.txt', "w") as f:
-    with redirect_stdout(f):
-        m.model.summary()
-
-from functions.plot import plot_multif_prediction
 
 from functions.utils_floodmodel import generate_prediction_array
-y_pred_train = m.predict(X_train)
-y_pred_train = generate_prediction_array(y_pred_train, y_train, forecast_range=14)
-
-plt.plot(y_train, y_pred_train)
-
-
-y_pred_valid = m.predict(X_valid)
-y_pred_valid = generate_prediction_array(y_pred_valid, y_orig, forecast_range=14)
 
 y_pred_test = m.predict(X_test)
 y_pred_test = generate_prediction_array(y_pred_test, y_test, forecast_range=14)
@@ -450,5 +263,7 @@ y_pred_test = generate_prediction_array(y_pred_test, y_test, forecast_range=14)
 from functions.plot import plot_multif_prediction
 title='Setting: Time-Delay Neural Net: 64 hidden nodes, dropout 0.25'
 plot_multif_prediction(y_pred_test, y_test, forecast_range=14, title=title)
+plt.savefig('./images/danube/multif_prediction.png', dpi=600, bbox_inches='tight')
+
 
 #Update shapefile with Shapefile in order to include the predictions for each individual basin

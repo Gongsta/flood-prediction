@@ -1,5 +1,5 @@
 "backend: tensorflow\nclass_name: Sequential\nconfig:\n  build_input_shape: !!python/tuple\n\
-  \  - null\n  - 9\n  layers:\n  - class_name: Dense\n    config:\n      activation:\
+  \  - null\n  - 13\n  layers:\n  - class_name: Dense\n    config:\n      activation:\
   \ tanh\n      activity_regularizer: null\n      bias_constraint: null\n      bias_initializer:\n\
   \        class_name: Zeros\n        config: {}\n      bias_regularizer: null\n \
   \     dtype: float32\n      kernel_constraint: null\n      kernel_initializer:\n\

@@ -23,7 +23,7 @@ from sklearn.linear_model import RidgeCV
 import keras
 from keras.layers.core import Dropout
 
-from .utils_floodmodel import select_upstream, reshape_scalar_predictand
+from .floodmodel_utils import select_upstream, reshape_scalar_predictand
 np.seterr(divide='ignore', invalid='ignore')
 
 
