@@ -1,32 +1,44 @@
 #Appending the path to the system so that the program can recognize the files
 import sys
 sys.path.append('/Users/stevengong/Desktop/flood-prediction')
-from functions.floodmodel_utils import get_basin_mask, shift_and_aggregate
+from functions.floodmodel_utils import get_basin_mask, shift_and_aggregate, add_time
 import xarray as xr
 import numpy as np
-
 #Creating a Dask local cluster for parallel computing (making the computations later on much faster)
 from dask.distributed import Client, LocalCluster
 
-cluster = LocalCluster()  #processes=4 threads=4, memory=8.59 GB
-client = Client(cluster)
+#cluster = LocalCluster()  #processes=4 threads=4, memory=8.59 GB
+client = Client("tcp://169.45.50.121:8786")
+print(client.scheduler_info()['services'])
 
 #This line of code connects the client to a remote cluster
 #client = Client("tcp://192.168.0.112:8786")  # memory_limit='16GB',
 
+import dask.dataframe as dd
+from gcsfs import GCSFileSystem
+gcs = GCSFileSystem(project="flood-prediction-263210", token='anon')
+gcs.ls('weather-data-copernicus')
+df = dd.read_parquet('gcs://weather-data-copernicus/data/')
+test = xr.open_mfdataset()
+#dask_function(..., storage_options={'token': gcs.session.credentials})
 
+file = gcs.open('gcs://weather-data-copernicus/data/Elbe/reanalysis-era5-single-levels_convective_precipitation,land_sea_mask,large_scale_precipitation,runoff,slope_of_sub_gridscale_orography,soil_type,total_column_water_vapour,volumetric_soil_water_layer_1,volumetric_soil_water_layer_2_1999_01.nc')
+ds = xr.open_mfdataset(file, engine='h5netcdf')
 #Loading our data located in a remote disk
 #The open_mfdataset function automatically combines the many .nc files thanks to the power of Dask, which opens the files in parallel, the file aren't loaded until .compute() is called
-era5Loaded = xr.open_mfdataset('/Volumes/Seagate Backup Plus Drive/data/Elbe/reanalysis-era5-single-levels_convective_precipitation,land_sea_mask,large_scale_precipitation,runoff,slope_of_sub_gridscale_orography,soil_type,total_column_water_vapour,volumetric_soil_water_layer_1,volumetric_soil_water_layer_2_*_*.nc', combine='by_coords')
-glofasLoaded = xr.open_mfdataset('/Volumes/Seagate Backup Plus Drive/data/*/CEMS_ECMWF_dis24_*_glofas_v2.1.nc', combine='by_coords', parallel=True)
+era5_loaded = xr.open_mfdataset('/Volumes/Seagate Backup Plus Drive/data/Elbe/reanalysis-era5-single-levels_convective_precipitation,land_sea_mask,large_scale_precipitation,runoff,slope_of_sub_gridscale_orography,soil_type,total_column_water_vapour,volumetric_soil_water_layer_1,volumetric_soil_water_layer_2_*_*.nc', combine='by_coords')
+glofas_loaded = xr.open_mfdataset('/Volumes/Seagate Backup Plus Drive/data/*/CEMS_ECMWF_dis24_*_glofas_v2.1.nc', combine='by_coords')
 
 
+era5_loaded = client.persist(era5_loaded)
 #DATA PREPROCESSING
 
 #Doing this for debugging purposes
-glofas = glofasLoaded.copy()
-era5 = era5Loaded.copy()
+glofas = glofas_loaded.copy()
+era5 = era5_loaded.copy()
 
+glofas.persist()
+era5.persist()
 #Renaming the glofas coordinates from 'lon' to 'longitude' so that it is identical with era5's coordinates, which are spelled 'longitude' and 'latitude'
 glofas = glofas.rename({'lon' : 'longitude'})
 glofas = glofas.rename({'lat': 'latitude'})
@@ -35,14 +47,14 @@ glofas = glofas.rename({'lat': 'latitude'})
 """At this point, the loaded GloFAS dataset includes all coordinates from around the world. We are only interested in looking at data from the Elbe basin, hence 
 we use the get_mask_of_basin function to drop all coordinates outside of the Elbe basin. Similarly, when era5 is downloaded, it is a square/rectangular area, so we need
  to remove all data that is not part of the basin so we can use relevant and predictive data."""
-elbe_mask = get_basin_mask(glofas['dis24'].isel(time=0), 'Elbe')
-glofas = glofas.where(elbe_mask, drop=True)
+elbe_basin_mask = get_basin_mask(glofas['dis24'].isel(time=0), 'Elbe')
+glofas = glofas.where(elbe_basin_mask, drop=True)
 
 #We first need to interpolate the data because there are different dimension sizes (era5 is 6x6 gridpoints whereas glofas provides 15x15 gridpoints
 #The following code would return an error:  >> era5 = era5.where(elbe_area, drop=True)
 #IN CASE YOU DON'T KNOW: #nterpolation is an estimation of a value within two known values in a sequence of values.
 #Polynomial interpolation is a method of estimating values between known data points
-era5 = era5.interp(latitude=glofas.latitude, longitude=glofas.longitude).where(elbe_mask, drop=True)
+era5 = era5.interp(latitude=glofas.latitude, longitude=glofas.longitude).where(elbe_basin_mask, drop=True)
 
 
 # Taking the average latitude and longitude of the area to reduce the dimensionality of our dataset
@@ -62,10 +74,15 @@ y_orig = glofas['dis24']
 y = y_orig.copy()
 y = y.diff('time', 1)
 
+#Era5 will be the predictor dataset
 X = era5
+
+y.compute()
+X.compute()
 
 from functions.floodmodel_utils import reshape_scalar_predictand
 #merges both values in time, since GLOFAS is daily while era5 is hourly data
+#TRY TO RESHAPE WITHOUT TAKING THE MEAN LATITUDE AND LONGITUDE OF X
 Xda, yda = reshape_scalar_predictand(X, y)
 
 
@@ -74,7 +91,6 @@ Xda, yda = reshape_scalar_predictand(X, y)
 X.features
 
 # Splitting the dataset into training, test, and validation
-
 period_train = dict(time=slice('1999', '2005'))
 period_valid = dict(time=slice('2006', '2011'))
 period_test = dict(time=slice('2012', '2016'))
@@ -87,22 +103,6 @@ X_test, y_test = Xda.loc[period_test], yda.loc[period_test]
 from sklearn.preprocessing import StandardScaler
 import keras
 from keras.layers.core import Dropout
-
-def add_time(vector, time, name=None):
-    """Converts numpy arrays to xarrays with a time coordinate.
-
-    Parameters
-    ----------
-    vector : np.array
-        1-dimensional array of predictions
-    time : xr.DataArray
-        the return value of `Xda.time`
-
-    Returns
-    -------
-    xr.DataArray
-    """
-    return xr.DataArray(vector, dims=('time'), coords={'time': time}, name=name)
 
 
 class DenseNN(object):
@@ -200,9 +200,10 @@ hist = m.fit(X_train, y_train, X_valid, y_valid)
 # Summary of Model
 m.model.summary()
 
-m.model.save('./models/elbemodel.h5')
-# save model
-from keras.utils import plot_model
+# # save model
+#
+# m.model.save('./models/elbemodel.h5')
+# from keras.utils import plot_model
 
 # plot Graph of Network
 
@@ -219,14 +220,27 @@ plt.legend(['Training', 'Validation'])
 ax.set_yscale('log')
 plt.savefig('./images/Elbe/ElbeNNlearningcurve.png', dpi=600, bbox_inches='tight')
 
-yaml_string = m.model.to_yaml()
-import yaml
+# serialize model to YAML
+model_yaml = m.model.to_yaml()
+with open("./models/elbe-model1.yaml", "w") as yaml_file:
+    yaml_file.write(model_yaml)
+# serialize weights to HDF5
+m.model.save_weights("./models/elbe-model1.h5")
+print("Saved model to disk")
 
-with open('./models/keras-config.yml', 'w') as f:
-    yaml.dump(yaml_string, f)
+# later...TO BE TESTED
 
-with open('./models/model-config.yml', 'w') as f:
-    yaml.dump(config, f, indent=4)
+# load YAML and create model
+yaml_file = open('./models/elbe-model1.yaml', 'r')
+loaded_model_yaml = yaml_file.read()
+yaml_file.close()
+from keras.models import model_from_yaml
+loaded_model = model_from_yaml(loaded_model_yaml)
+# load weights into new model
+loaded_model.load_weights("./models/elbe-model1.h5")
+print("Loaded model from disk")
+
+m.model = loaded_model
 
 from contextlib import redirect_stdout
 
@@ -240,7 +254,7 @@ plot_model(m.model, to_file='./images/Elbe/ElbeNNmodel.png', show_shapes=True)
 
 from functions.plot import plot_multif_prediction
 
-from functions.utils_floodmodel import generate_prediction_array
+from functions.floodmodel_utils import generate_prediction_array
 
 y_pred_train = m.predict(X_train)
 y_pred_train = generate_prediction_array(y_pred_train, y_orig, forecast_range=14)

@@ -1,52 +1,58 @@
+#Appending the path to the system so that the program can recognize the files
 import sys
 sys.path.append('/Users/stevengong/Desktop/flood-prediction')
-from functions.floodmodel_utils import get_basin_index, get_basin_mask, createPointList, shift_and_aggregate, select_riverpoints
-import matplotlib
-#matplotlib.use('Agg')
+from functions.floodmodel_utils import get_basin_mask, shift_and_aggregate, add_time, get_river_mask
 import xarray as xr
-
+import matplotlib.pyplot as plt
+import numpy as np
+#Creating a Dask local cluster for parallel computing (making the computations later on much faster)
 from dask.distributed import Client, LocalCluster
 
-cluster = LocalCluster()  # processes=4, threads=4,
-
-#Connecting my client to the cluster does not work :((
-#client = Client("tcp://192.168.0.112:8786")  # memory_limit='16GB',
+cluster = LocalCluster()  #processes=4 threads=4, memory=8.59 GB
 client = Client(cluster)
+print(client.scheduler_info()['services'])
 
-#Loading our data
-#The open_mfdataset function automatically combines the many .nc files, the * represents the value that varies
-era5Loaded = xr.open_mfdataset('/Volumes/Seagate Backup Plus Drive/data/Elbe/reanalysis-era5-single-levels_convective_precipitation,land_sea_mask,large_scale_precipitation,runoff,slope_of_sub_gridscale_orography,soil_type,total_column_water_vapour,volumetric_soil_water_layer_1,volumetric_soil_water_layer_2_*_*.nc', combine='by_coords')
-
-glofasLoaded = xr.open_mfdataset('/Volumes/Seagate Backup Plus Drive/data/*/CEMS_ECMWF_dis24_*_glofas_v2.1.nc', combine='by_coords')
+#This line of code connects the client to a remote cluster
+#client = Client("tcp://192.168.0.112:8786")  # memory_limit='16GB',
 
 
-era5 = era5Loaded
-glofas = glofasLoaded
+#Loading our data located in a remote disk
+#The open_mfdataset function automatically combines the many .nc files thanks to the power of Dask, which opens the files in parallel, the file aren't loaded until .compute() is called
+era5_loaded = xr.open_mfdataset('/Volumes/Seagate Backup Plus Drive/data/Elbe/reanalysis-era5-single-levels_convective_precipitation,land_sea_mask,large_scale_precipitation,runoff,slope_of_sub_gridscale_orography,soil_type,total_column_water_vapour,volumetric_soil_water_layer_1,volumetric_soil_water_layer_2_*_*.nc', combine='by_coords')
+glofas_loaded = xr.open_mfdataset('/Volumes/Seagate Backup Plus Drive/data/*/CEMS_ECMWF_dis24_*_glofas_v2.1.nc', combine='by_coords')
 
 
-#Data Processing
+#DATA PREPROCESSING
 
-#To read a single shape by calling its index use the shape() method. The index is the shape's count from 0.
-# So to read the 8th shape record you would use its index which is 7.
+#Doing this for debugging purposes
+glofas = glofas_loaded.copy()
+era5 = era5_loaded.copy()
 
+#Renaming the glofas coordinates from 'lon' to 'longitude' so that it is identical with era5's coordinates, which are spelled 'longitude' and 'latitude'
 glofas = glofas.rename({'lon' : 'longitude'})
 glofas = glofas.rename({'lat': 'latitude'})
 
-import matplotlib.pyplot as plt
 
-elbe_mask = get_basin_mask(glofas['dis24'].isel(time=0), 'Elbe')
-glofas = glofas.where(elbe_mask, drop=True)
-era5 = era5.interp(latitude=glofas.latitude, longitude=glofas.longitude).where(elbe_mask, drop=True)
-#Why is there a need to interpolate? --> Because there are different dimension sizes (era5 is 6x6 gridpoints whereas glofas provides 15x15 gridpoints
-#The following code would return an error:  era5 = era5.where(elbe_area, drop=True)
-#Interpolation is an estimation of a value within two known values in a sequence of values. Polynomial interpolation is a method of estimating values between known data points
+"""At this point, the loaded GloFAS dataset includes all coordinates from around the world. We are only interested in looking at data from the Elbe basin, hence 
+we use the get_mask_of_basin function to drop all coordinates outside of the Elbe basin. Similarly, when era5 is downloaded, it is a square/rectangular area, so we need
+ to remove all data that is not part of the basin so we can use relevant and predictive data."""
+elbe_basin_mask = get_basin_mask(glofas['dis24'].isel(time=0), 'Elbe')
+glofas = glofas.where(elbe_basin_mask, drop=True)
+
+#We first need to interpolate the data because there are different dimension sizes (era5 is 6x6 gridpoints whereas glofas provides 15x15 gridpoints
+#The following code would return an error:  >> era5 = era5.where(elbe_area, drop=True)
+#IN CASE YOU DON'T KNOW: #nterpolation is an estimation of a value within two known values in a sequence of values.
+#Polynomial interpolation is a method of estimating values between known data points
+era5 = era5.interp(latitude=glofas.latitude, longitude=glofas.longitude).where(elbe_basin_mask, drop=True)
 
 
-#River selection
-dis_map_mean = glofas['dis24'].mean('time')
-is_river = select_riverpoints(dis_map_mean)
-mask_river_in_catchment = is_river & elbe_area
-plt.imshow(mask_river_in_catchment.astype(int))
+
+#River selection (Optional) --> ***NOT IMPLEMENTED YET IN THE MODEL PIPELINE***
+elbe_river_mask = get_river_mask(glofas['dis24'].mean('time'))
+glofas_river = glofas
+glofas_river = glofas_river.where(elbe_river_mask, drop=True)
+glofas_river.isel(time=0).plot()
+#plt.imshow(elbe_river_mask.astype(int))
 plt.title('Elbe River')
 plt.savefig('./images/Elbe/Elbe_river', dpi=600)
 
@@ -105,46 +111,31 @@ plt.close()
 #glofas['dis24'].sel(time=slice('2013-5', '2013-6')).plot()
 
 
-# Creating the model
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
+y_orig = glofas['dis24']
+#Making a copy because y will be transformed to represent the variation of discharge. The model will be predicting the variation of discharge, not the quantity of discharge itself
+y = y_orig.copy()
+y = y.diff('time', 1)
 
-
-
-'''
-import dask.array as da
-x = da.random.random((40000,40000), chunks=(1000,1000))
-y = da.exp(x).sum()
-y.compute()
-'''
-
-scheduler = cluster.scheduler
-workers = cluster.workers
-
-y = glofas['dis24']
 X = era5
 
-from functions.utils_floodmodel import reshape_scalar_predictand
-
+from functions.floodmodel_utils import reshape_scalar_predictand
 #merges both values in time, since GLOFAS is daily while era5 is hourly data
-X, y = reshape_scalar_predictand(X, y)
-#Reshape this so that each point is a predictor
+Xda, yda = reshape_scalar_predictand(X, y)
+
 
 """PROBLEM"""
 # need to fix dimensionality problem, since GloFAS is a daily dataset, whereas ERA5 iss an hourly dataset. I would want to uppscale instead of downscale.
 X.features
 
 # Splitting the dataset into training, test, and validation
+period_train = dict(time=slice('1999', '2005'))
+period_valid = dict(time=slice('2006', '2011'))
+period_test = dict(time=slice('2012', '2016'))
 
-period_train = dict(time=slice('2005', '2012'))
-period_valid = dict(time=slice('2013', '2015'))
-period_test = dict(time=slice('2015', '2016'))
-
-X_train, y_train = X.loc[period_train], y.loc[period_train]
-X_valid, y_valid = X.loc[period_valid], y.loc[period_valid]
-X_test, y_test = X.loc[period_test], y.loc[period_test]
-
+#Train-test split
+X_train, y_train = Xda.loc[period_train], yda.loc[period_train]
+X_valid, y_valid = Xda.loc[period_valid], yda.loc[period_valid]
+X_test, y_test = Xda.loc[period_test], yda.loc[period_test]
 
 
 from sklearn.pipeline import Pipeline
@@ -152,23 +143,6 @@ from sklearn.preprocessing import StandardScaler
 import keras
 from keras.layers.core import Dropout
 from keras.constraints import MinMaxNorm, nonneg
-
-
-def add_time(vector, time, name=None):
-    """Converts numpy arrays to xarrays with a time coordinate.
-
-    Parameters
-    ----------
-    vector : np.array
-        1-dimensional array of predictions
-    time : xr.DataArray
-        the return value of `Xda.time`
-
-    Returns
-    -------
-    xr.DataArray
-    """
-    return xr.DataArray(vector, dims=('time'), coords={'time': time}, name=name)
 
 
 class DenseNN(object):

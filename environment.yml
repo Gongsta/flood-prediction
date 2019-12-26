@@ -10,9 +10,12 @@ dependencies:
   - dask-glm
   - dask-ml
   - gdal
+  - gcsfs
   - geopandas
   - geos
   - geotiff
+  - google-api-python-client
+  - graphviz
   - h5py
   - hdf4
   - hdf5
@@ -32,6 +35,7 @@ dependencies:
   - pandas
   - pip
   - pyproj
+  - python-graphviz
   - py-xgboost
   - rasterio
   - s3fs
