@@ -288,6 +288,8 @@ def generate_prediction_array(y_pred, y_reana, forecast_range=14):
     # add +1 to forecast range to include the init state in the length
     num_forecasts = int(np.floor(y_pred.shape[0]/(forecast_range+1)))
     full_forecast_len = num_forecasts*(forecast_range+1)
+    #Gets the values starting from the beginning of the array. Ex: if full_forecast_len is 14, it gets the
+    #first 14 values
     new_pred = y_pred[:full_forecast_len].copy()
     time_new = y_pred.time[:full_forecast_len].copy()
     time_new_data = time_new.values.reshape([num_forecasts, (forecast_range+1)])

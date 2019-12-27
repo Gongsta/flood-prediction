@@ -9,6 +9,7 @@ dependencies:
   - dask
   - dask-glm
   - dask-ml
+  - fsspec
   - gdal
   - gcsfs
   - geopandas
@@ -67,3 +68,4 @@ dependencies:
   - yaml
   - pyshp
   - pydot
+  - zarr

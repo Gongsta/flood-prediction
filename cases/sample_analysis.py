@@ -1,6 +1,6 @@
 import sys
 sys.path.append('/Users/stevengong/Desktop/flood-prediction')
-from functions.floodmodel_utils import get_mask_of_basin, createPointList, shift_and_aggregate, generate_prediction_array, reshape_scalar_predictand
+from functions.floodmodel_utils import get_basin_mask, shift_and_aggregate, generate_prediction_array, reshape_scalar_predictand
 import xarray as xr
 
 # Creating the model
@@ -10,6 +10,7 @@ from dask.distributed import Client, LocalCluster
 
 cluster = LocalCluster()  # n_workers=10, threads_per_worker=1,
 client = Client()
+print(client.scheduler_info()['services'])
 
 #Connecting my client to the cluster does not work :((
 #client = Client("tcp://192.168.0.112:8786")  # memory_limit='16GB',
@@ -17,7 +18,7 @@ client = Client()
 
 #Loading our data
 #The open_mfdataset function automatically combines the many .nc files, the * represents the value that varies
-ds = xr.open_dataset('/Users/stevengong/Desktop/data/features_xy.nc')
+ds = xr.open_dataset('../data/features_xy.nc')
 
 
 
@@ -25,8 +26,8 @@ y_orig = ds['dis']
 y = y_orig.copy()
 X = ds.drop(['dis', 'dis_diff'])
 
-#try removing this and see if it yields the same results
-#y = y.diff('time', 1)
+#try removing this and see if it yields the same results. No removing it will cause the plot at ./images/test/failed_model.png
+y = y.diff('time', 1)
 
 Xda, yda = reshape_scalar_predictand(X, y)
 
@@ -38,29 +39,15 @@ X_train, y_train = Xda.loc[period_train], yda.loc[period_train]
 X_valid, y_valid = Xda.loc[period_valid], yda.loc[period_valid]
 X_test, y_test = Xda.loc[period_test], yda.loc[period_test]
 
+
+
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 import keras
 from keras.layers.core import Dropout
 from keras.constraints import MinMaxNorm, nonneg
 
-
-def add_time(vector, time, name=None):
-    """Converts numpy arrays to xarrays with a time coordinate.
-
-    Parameters
-    ----------
-    vector : np.array
-        1-dimensional array of predictions
-    time : xr.DataArray
-        the return value of `Xda.time`
-
-    Returns
-    -------
-    xr.DataArray
-    """
-    return xr.DataArray(vector, dims=('time'), coords={'time': time}, name=name)
-
+from functions.floodmodel_utils import add_time
 
 class DenseNN(object):
     def __init__(self, **kwargs):
@@ -167,19 +154,46 @@ ax.set_xlabel('Epoch')
 plt.legend(['Training', 'Validation'])
 ax.set_yscale('log')
 
+
+#serialize model to yaml file
+model_yaml = m.model.to_yaml()
+with open('./models/test/testmodel.yml', 'w') as yaml_file:
+    yaml_file.write(model_yaml)
+
+#Serializing weights to h5 file
+m.model.save_weights('./models/test/weights.h5')
+
+
+#LATER ON... LOADING THE WEIGHTS
+yaml_model = open('./models/test/testmodel.yml', 'r').read()
+from keras.models import model_from_yaml
+loaded_model = model_from_yaml(yaml_model)
+loaded_model.load_weights('./models/test/weights.h5')
+
+m.model = loaded_model
+
 y_pred_train = m.predict(X_train)
+#You may need to rewrite this function, you want the prediction to be based on the previous day's discharge
 y_pred_train = generate_prediction_array(y_pred_train, y_orig, forecast_range=14)
 
+
 y_pred_valid = m.predict(X_valid)
-y_pred_valid = generate_prediction_array(y_pred_valid, y_orig, forecast_range=14)
+y_pred_valid = generate_prediction_array(y_pred_valid, y_orig, forecast_range=30)
 
 y_pred_test = m.predict(X_test)
-y_pred_test = generate_prediction_array(y_pred_test, y_orig, forecast_range=14)
+y_pred_test = generate_prediction_array(y_pred_test, y_orig, forecast_range=30)
+
+period_case = dict(time=slice('2015-10-12', '2015-10-13'))
+X_case, y_case = Xda.loc[period_case], yda.loc[period_case]
+
+y_pred_case = m.predict(X_case)
+y_pred_case = generate_prediction_array(y_pred_case, y_orig, forecast_range=2)
+
 
 from functions.plot import plot_multif_prediction
 title='Setting: Time-Delay Neural Net: 64 hidden nodes, dropout 0.25'
-plot_multif_prediction(y_pred_test, y_orig, forecast_range=14, title=title)
-plt.savefig('./images/sampleanalysis.png', dpi=600)
+plot_multif_prediction(y_pred_test, y_orig, forecast_range=30, title=title)
+plt.savefig('./images/test/multif_prediction.png', dpi=600)
 
 
 

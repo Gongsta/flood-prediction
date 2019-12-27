@@ -28,6 +28,10 @@ glofas_loaded = xr.open_mfdataset('/Volumes/Seagate Backup Plus Drive/data/*/CEM
 glofas = glofas_loaded.copy()
 era5 = era5_loaded.copy()
 
+
+glofas.persist()
+era5.persist()
+
 #Renaming the glofas coordinates from 'lon' to 'longitude' so that it is identical with era5's coordinates, which are spelled 'longitude' and 'latitude'
 glofas = glofas.rename({'lon' : 'longitude'})
 glofas = glofas.rename({'lat': 'latitude'})
@@ -61,14 +65,14 @@ glofas['dis24'].isel(time=1).plot()
 plt.savefig('./images/Elbe/1999_glofas_Elbe_basin', dpi=600)
 
 
-era5['lsp'].isel(time=1).plot()
+ ,,era5['lsp'].isel(time=1).plot()
 plt.savefig('./images/Elbe/era5_Elbe_basin', dpi=600)
 
 #Visualizing the region from 1999-2019
 dis_mean = glofas['dis24'].mean('time')
 dis_mean.plot()
 plt.title('Mean discharge in Elbe from 1999-2019')
-plt.savefig('./images/Elbe/average_discharge_map', dpi=600)
+plt.savefig('./images/Elbe/average_discharge_map_1999-2019', dpi=600)
 
 # Taking the average latitude and longitude if necessary
 era5 = era5.mean(['latitude', 'longitude'])
@@ -257,7 +261,7 @@ ax.set_ylabel('Loss')
 ax.set_xlabel('Epoch')
 plt.legend(['Training', 'Validation'])
 ax.set_yscale('log')
-plt.savefig('../images/Elbe/ElbeNNlearningcurve.png', dpi=600, bbox_inches='tight')
+plt.savefig('../images/Elbe/model/ElbeNNlearningcurve.png', dpi=600, bbox_inches='tight')
 
 yaml_string = m.model.to_yaml()
 import yaml
@@ -276,7 +280,7 @@ with open('./models/ElbeNNsummary.txt', "w") as f:
 
 from keras.utils import plot_model
 
-plot_model(m.model, to_file='./images/Elbe/ElbeNNmodel.png', show_shapes=True)
+plot_model(m.model, to_file='./images/Elbe/model/ElbeNNmodel.png', show_shapes=True)
 
 from functions.plot import plot_multif_prediction
 

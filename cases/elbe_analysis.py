@@ -14,15 +14,40 @@ print(client.scheduler_info()['services'])
 #This line of code connects the client to a remote cluster
 #client = Client("tcp://192.168.0.112:8786")  # memory_limit='16GB',
 
-import dask.dataframe as dd
+
+
+era5_loaded = xr.open_mfdataset('/Volumes/portableHardDisk/data/Elbe/reanalysis-era5-single-levels_convective_precipitation,land_sea_mask,large_scale_precipitation,runoff,slope_of_sub_gridscale_orography,soil_type,total_column_water_vapour,volumetric_soil_water_layer_1,volumetric_soil_water_layer_2_*_*.nc', combine='by_coords', chunks={'latitude':4, 'longitude':4,'time':4})
+glofas_loaded = xr.open_mfdataset('/Volumes/portableHardDisk/data/*/CEMS_ECMWF_dis24_*_glofas_v2.1.nc', combine='by_coords')
+
+era5_loaded = era5_loaded.chunk(25)
+
+era5_loaded.to_zarr('/Volumes/Seagate Backup Plus Drive/weatherdata/Elbe', consolidated=True)
+glofas_loaded.to_zarr('/Volumes/Seagate Backup Plus Drive/weatherdata/glofas', consolidated=True)
+
+#Call this in console
+#gcloud auth login
+#gsutil -m cp -r /Volumes/portableHardDisk/weatherdata/Elbe/ gs://weather-data-copernicus/
+#gsutil -m cp -r /Volumes/portableHardDisk/weatherdata/glofas/ gs://weather-data-copernicus/
+
+#this is suggested in the pangeo documentation
+import xarray as xr
+import fsspec
+ds = xr.open_zarr(fsspec.get_mapper('gcs://weather-data-copernicus/Elbe'))
+#ds = xr.open_zarr('/Volumes/Seagate Backup Plus Drive/weatherdata/glofas')
+
+#This is from the original xarray documentation
+
+import gcsfs
 from gcsfs import GCSFileSystem
 gcs = GCSFileSystem(project="flood-prediction-263210", token='anon')
-gcs.ls('weather-data-copernicus')
-df = dd.read_parquet('gcs://weather-data-copernicus/data/')
-test = xr.open_mfdataset()
+gcsmap = gcsfs.mapping.GCSMap('weather-data-copernicus', gcs=gcs, check=True, create=False)
+ds_gcs = xr.open_zarr(gcsmap)
+
+
 #dask_function(..., storage_options={'token': gcs.session.credentials})
 
 file = gcs.open('gcs://weather-data-copernicus/data/Elbe/reanalysis-era5-single-levels_convective_precipitation,land_sea_mask,large_scale_precipitation,runoff,slope_of_sub_gridscale_orography,soil_type,total_column_water_vapour,volumetric_soil_water_layer_1,volumetric_soil_water_layer_2_1999_01.nc')
+#This allows me to read the file from the cloud
 ds = xr.open_mfdataset(file, engine='h5netcdf')
 #Loading our data located in a remote disk
 #The open_mfdataset function automatically combines the many .nc files thanks to the power of Dask, which opens the files in parallel, the file aren't loaded until .compute() is called
@@ -37,7 +62,8 @@ era5_loaded = client.persist(era5_loaded)
 glofas = glofas_loaded.copy()
 era5 = era5_loaded.copy()
 
-glofas.persist()
+#WHICH ONE TO USE? client.persist(glofas) or glofas,persist()?
+ glofas.persist()
 era5.persist()
 #Renaming the glofas coordinates from 'lon' to 'longitude' so that it is identical with era5's coordinates, which are spelled 'longitude' and 'latitude'
 glofas = glofas.rename({'lon' : 'longitude'})
@@ -158,7 +184,9 @@ class DenseNN(object):
             with coordinates (time,)
         """
         X = self.xscaler.transform(Xda.values)
+        #Calling the squeeze does what??
         y = self.model.predict(X).squeeze()
+        #Since we applied feature scaling to y, we need to revert back to obtain the original value
         y = self.yscaler.inverse_transform(y)
 
         y = add_time(y, Xda.time, name=name)
@@ -205,7 +233,7 @@ m.model.summary()
 # m.model.save('./models/elbemodel.h5')
 # from keras.utils import plot_model
 
-# plot Graph of Network
+# Plotting Graph of Network
 
 h = hist.model.history
 
@@ -226,7 +254,6 @@ with open("./models/elbe-model1.yaml", "w") as yaml_file:
     yaml_file.write(model_yaml)
 # serialize weights to HDF5
 m.model.save_weights("./models/elbe-model1.h5")
-print("Saved model to disk")
 
 # later...TO BE TESTED
 
