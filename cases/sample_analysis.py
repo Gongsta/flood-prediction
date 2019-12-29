@@ -46,6 +46,7 @@ from sklearn.preprocessing import StandardScaler
 import keras
 from keras.layers.core import Dropout
 from keras.constraints import MinMaxNorm, nonneg
+from sklearn.externals.joblib import dump, load
 
 from functions.floodmodel_utils import add_time
 
@@ -53,7 +54,9 @@ class DenseNN(object):
     def __init__(self, **kwargs):
         self.output_dim = 1
         self.xscaler = StandardScaler()
+
         self.yscaler = StandardScaler()
+
 
         model = keras.models.Sequential()
         self.cfg = kwargs
@@ -140,6 +143,9 @@ config = dict(hidden_nodes=(64,),
 m = DenseNN(**config)
 hist = m.fit(X_train, y_train, X_valid, y_valid)
 
+#Saving the feature scaling settings for later
+dump(m.xscaler, './models/test/x_std_scaler.bin', compress=True)
+dump(m.yscaler, './models/test/y_std_scaler.bin', compress=True)
 
 import matplotlib.pyplot as plt
 h = hist.model.history
@@ -169,8 +175,9 @@ yaml_model = open('./models/test/testmodel.yml', 'r').read()
 from keras.models import model_from_yaml
 loaded_model = model_from_yaml(yaml_model)
 loaded_model.load_weights('./models/test/weights.h5')
-
 m.model = loaded_model
+m.xscaler.fit_transform(X_train.values)
+m.yscaler.fit_transform(y_train.values.reshape(-1, m.output_dim))
 
 y_pred_train = m.predict(X_train)
 #You may need to rewrite this function, you want the prediction to be based on the previous day's discharge
@@ -189,6 +196,8 @@ X_case, y_case = Xda.loc[period_case], yda.loc[period_case]
 y_pred_case = m.predict(X_case)
 y_pred_case = generate_prediction_array(y_pred_case, y_orig, forecast_range=2)
 
+
+#Trying to remove this generate_prediction_array function, add a function where we loop through the function and predict the future values
 
 from functions.plot import plot_multif_prediction
 title='Setting: Time-Delay Neural Net: 64 hidden nodes, dropout 0.25'

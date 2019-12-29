@@ -248,8 +248,6 @@ m.model.save('../models/elbemodel.h5')
 # save model
 from keras.utils import plot_model
 
-# plot Graph of Network
-
 h = hist.model.history
 
 # Plot training & validation loss value

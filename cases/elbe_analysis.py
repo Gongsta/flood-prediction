@@ -228,12 +228,7 @@ hist = m.fit(X_train, y_train, X_valid, y_valid)
 # Summary of Model
 m.model.summary()
 
-# # save model
-#
-# m.model.save('./models/elbemodel.h5')
-# from keras.utils import plot_model
 
-# Plotting Graph of Network
 
 h = hist.model.history
 
@@ -254,20 +249,18 @@ with open("./models/elbe-model1.yaml", "w") as yaml_file:
     yaml_file.write(model_yaml)
 # serialize weights to HDF5
 m.model.save_weights("./models/elbe-model1.h5")
+#Seialize feature scaling weights
 
-# later...TO BE TESTED
 
-# load YAML and create model
-yaml_file = open('./models/elbe-model1.yaml', 'r')
-loaded_model_yaml = yaml_file.read()
-yaml_file.close()
+
+#LATER ON... LOADING THE WEIGHTS
+yaml_model = open('./models/elbe-model1.yaml', 'r').read()
 from keras.models import model_from_yaml
-loaded_model = model_from_yaml(loaded_model_yaml)
-# load weights into new model
-loaded_model.load_weights("./models/elbe-model1.h5")
-print("Loaded model from disk")
-
+loaded_model = model_from_yaml(yaml_model)
+loaded_model.load_weights('./models/elbe-model1.h5')
 m.model = loaded_model
+m.xscaler.fit_transform(X_train.values)
+m.yscaler.fit_transform(y_train.values.reshape(-1, m.output_dim))
 
 from contextlib import redirect_stdout
 
