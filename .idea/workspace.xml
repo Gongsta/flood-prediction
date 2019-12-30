@@ -2,28 +2,35 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e15b811c-8d99-4f22-9516-0891d521f49b" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/cases/sample_analysis_LSTM.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cases/elbe_analysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/cases/elbe_analysis.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cases/elbe_analysis_with_plots.py" beforeDir="false" afterPath="$PROJECT_DIR$/cases/elbe_analysis_with_plots.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cases/sample_analysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/cases/sample_analysis.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-04x6siie.dirlock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-1qi2his_.dirlock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-2xy8eiso.dirlock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-4uszdv_2.dirlock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-6y1ghn0e.dirlock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-cmc1gagi.dirlock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-m73xfpw4.dirlock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-mwt5ss8z.dirlock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-mxhwnigk.dirlock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-np2b51iz.dirlock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-p57s50f6.dirlock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-u3innnt_.dirlock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-wx84fyaz.dirlock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-wyt45944.dirlock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-y24tg3hb.dirlock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-zul3ase6.dirlock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/forecast.png" beforeDir="false" afterPath="$PROJECT_DIR$/images/forecast.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/test/multif_prediction.png" beforeDir="false" afterPath="$PROJECT_DIR$/images/test/multif_prediction.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-30ap9ubp.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-474xhxm8.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-5u5s9jk3.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-66tadvdw.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-69o8ia6j.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-9gxc8grp.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-9tg4040i.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-b9vg9qz7.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-deve5sza.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-dyv5rm7x.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-iyyrex6i.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-j0fdub6c.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-jmg7___f.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-mvju4sl1.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-puq8uik7.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-q8d6ltn8.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-qr9ksyyk.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-rrk1tgfw.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-w4o0g6gn.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-weupgnit.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-x80u0kfx.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-xmbksndz.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-yev5kx9l.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-yithszl2.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions/floodmodel_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/functions/floodmodel_utils.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/models/test/testmodel.yml" beforeDir="false" afterPath="$PROJECT_DIR$/models/test/testmodel.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/models/test/weights.h5" beforeDir="false" afterPath="$PROJECT_DIR$/models/test/weights.h5" afterDir="false" />
     </list>
@@ -35,20 +42,52 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/cases/elbe_analysis.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="342">
+              <caret line="51" column="21" selection-start-line="51" selection-end-line="52" />
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/cases/sample_analysis.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-5789">
-              <caret column="10" selection-start-column="10" selection-end-column="10" />
+            <state relative-caret-position="299">
+              <caret line="198" column="148" selection-start-line="198" selection-start-column="148" selection-end-line="198" selection-end-column="148" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
+        <entry file="file:///opt/miniconda3/envs/flood_prediction/lib/python3.7/site-packages/xarray/core/dataarray.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="246">
+              <caret line="2656" column="8" selection-start-line="2656" selection-start-column="8" selection-end-line="2656" selection-end-column="8" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/cases/sample_analysis_LSTM.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="185">
+              <caret line="217" column="20" selection-start-line="217" selection-start-column="20" selection-end-line="217" selection-end-column="20" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/images/test/multif_prediction.png">
+          <provider selected="true" editor-type-id="images" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/functions/floodmodel_utils.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="4400">
-              <caret line="275" column="4" selection-start-line="275" selection-start-column="4" selection-end-line="275" selection-end-column="4" />
+            <state relative-caret-position="221">
+              <caret line="298" column="103" selection-start-line="298" selection-start-column="103" selection-end-line="298" selection-end-column="103" />
               <folding>
                 <element signature="e#119#134#0" expanded="true" />
               </folding>
@@ -67,8 +106,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>xscaler</find>
-      <find>2005</find>
       <find>dask</find>
       <find>era5</find>
       <find>mask_of</find>
@@ -97,6 +134,8 @@
       <find>add_time</find>
       <find>reshape</find>
       <find>dump</find>
+      <find>cumsum</find>
+      <find>diff</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -133,10 +172,11 @@
         <option value="$PROJECT_DIR$/cases/bangladesh_with_plots.py" />
         <option value="$PROJECT_DIR$/cases/bangladesh.py" />
         <option value="$PROJECT_DIR$/cases/elbe_analysis_with_coordinates.py" />
-        <option value="$PROJECT_DIR$/functions/floodmodel_utils.py" />
         <option value="$PROJECT_DIR$/convert_to_zarr.py" />
         <option value="$PROJECT_DIR$/cases/elbe_analysis_with_plots.py" />
         <option value="$PROJECT_DIR$/cases/elbe_analysis.py" />
+        <option value="$PROJECT_DIR$/functions/floodmodel_utils.py" />
+        <option value="$PROJECT_DIR$/cases/sample_analysis_LSTM.py" />
         <option value="$PROJECT_DIR$/cases/sample_analysis.py" />
       </list>
     </option>
@@ -180,11 +220,6 @@
               <item name="flood-prediction" type="462c0819:PsiDirectoryNode" />
               <item name="images" type="462c0819:PsiDirectoryNode" />
               <item name="test" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="flood-prediction" type="b2602c69:ProjectViewProjectNode" />
-              <item name="flood-prediction" type="462c0819:PsiDirectoryNode" />
-              <item name="models" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -236,7 +271,7 @@
     <frame x="0" y="0" width="1440" height="900" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.33051446" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.21000704" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -249,7 +284,7 @@
       <window_info anchor="bottom" id="Version Control" order="7" weight="0.32871288" />
       <window_info anchor="bottom" id="Terminal" order="8" sideWeight="0.49964765" weight="0.31445783" />
       <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.5003524" side_tool="true" weight="0.33373493" />
-      <window_info anchor="bottom" id="Python Console" order="10" sideWeight="0.49964765" visible="true" weight="0.24096386" />
+      <window_info active="true" anchor="bottom" id="Python Console" order="10" sideWeight="0.49964765" visible="true" weight="0.39759037" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -275,13 +310,6 @@
     </layout-to-restore>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/images/&lt;xarray.DataArray 'features' ()&gt;&#10;array('lsm', dtype='&lt;U5')&#10;Coordinates:&#10;    features  &lt;U5 'lsm'era5.png" />
-    <entry file="file://$PROJECT_DIR$/images/model.png">
-      <provider selected="true" editor-type-id="images" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/images/glofasvisualization&lt;xarray.DataArray 'features' ()&gt;&#10;array('dis24', dtype='&lt;U5')&#10;Coordinates:&#10;    features  &lt;U5 'dis24'.png">
-      <provider selected="true" editor-type-id="images" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/images/Elbe/ElbeNNmodel.png" />
     <entry file="file://$PROJECT_DIR$/images/Elbe/ElbeNNlearningcurve.png" />
     <entry file="file:///opt/miniconda3/envs/flood_prediction/lib/python3.7/site-packages/matplotlib/pyplot.py">
@@ -487,9 +515,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/images/test/multif_prediction.png">
-      <provider selected="true" editor-type-id="images" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/functions/plot.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="217">
@@ -514,27 +539,53 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/cases/elbe_analysis.py">
+    <entry file="file:///opt/miniconda3/envs/flood_prediction/lib/python3.7/site-packages/fsspec/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-3709">
-          <caret line="36" lean-forward="true" selection-start-line="36" selection-end-line="36" />
+        <state>
+          <folding>
+            <element signature="e#0#34#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/functions/floodmodel_utils.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4400">
-          <caret line="275" column="4" selection-start-line="275" selection-start-column="4" selection-end-line="275" selection-end-column="4" />
+        <state relative-caret-position="221">
+          <caret line="298" column="103" selection-start-line="298" selection-start-column="103" selection-end-line="298" selection-end-column="103" />
           <folding>
             <element signature="e#119#134#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/cases/elbe_analysis.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="342">
+          <caret line="51" column="21" selection-start-line="51" selection-end-line="52" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/images/test/multif_prediction.png">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cases/sample_analysis_LSTM.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="185">
+          <caret line="217" column="20" selection-start-line="217" selection-start-column="20" selection-end-line="217" selection-end-column="20" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///opt/miniconda3/envs/flood_prediction/lib/python3.7/site-packages/xarray/core/dataarray.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="246">
+          <caret line="2656" column="8" selection-start-line="2656" selection-start-column="8" selection-end-line="2656" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/cases/sample_analysis.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-5789">
-          <caret column="10" selection-start-column="10" selection-end-column="10" />
+        <state relative-caret-position="299">
+          <caret line="198" column="148" selection-start-line="198" selection-start-column="148" selection-end-line="198" selection-end-column="148" />
         </state>
       </provider>
     </entry>

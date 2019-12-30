@@ -40,6 +40,54 @@ period_test = dict(time=slice('2012', '2016'))
 X_train, y_train = Xda.loc[period_train], yda.loc[period_train]
 X_valid, y_valid = Xda.loc[period_valid], yda.loc[period_valid]
 X_test, y_test = Xda.loc[period_test], yda.loc[period_test]
+"""
+I'm trying to preserve the xarray format, but its not working well so far..
+
+
+new = xr.DataArray()
+new = new.combine_first(X_train[0:60, 0])
+new = xr.concat([new, X_train[1:61, 0]], 'new_time')
+new = new.dropna('time')
+
+for i in range(60, 150):
+    new = xr.concat([new, X_train[i-60:i, 0]], 'new_time')
+    new = new.dropna('time')
+
+
+for i in range (60, 150):
+    test = xr.concat([test, ])
+
+new = xr.merge(new, X_train[0])
+new = new.combine_first(X_train[0])
+
+
+"""
+
+#TRying with 1 feature for now
+
+#Using exclusively the discharge to predict the discharge
+import numpy as np
+new_X_train = []
+new_y_train = []
+for i in range(60,8922):
+    #OR DO
+    #    new_X_train.append(X_train[i-60:i,0]) ? It keeps the xarrays
+
+    new_X_train.append(y_train.values[i-60:i])
+    new_y_train.append(y_train.values[i])
+
+new_X_train, new_y_train = np.array(new_X_train), np.array(new_y_train)
+
+new_X_train = np.reshape(new_X_train, (new_X_train.shape[0], new_X_train.shape[1], 1))
+
+
+original_plot = np.concatenate(([y_orig[0].values], y_train.values)).cumsum()
+
+import matplotlib.pyplot as plt
+
+plt.plot(original_plot)
+"""This is being tested"""
+
 
 
 
@@ -54,7 +102,30 @@ from sklearn.externals.joblib import dump, load
 
 from functions.floodmodel_utils import add_time
 
-class DenseNN(object):
+
+regressor = Sequential()
+
+regressor.add(LSTM(units=50, return_sequences= True, input_shape=(new_X_train.shape[1], 1)))
+regressor.add(Dropout(0.2))
+
+regressor.add(LSTM(units=50, return_sequences= True))
+regressor.add(Dropout(0.2))
+
+regressor.add(LSTM(units=50, return_sequences= True))
+regressor.add(Dropout(0.2))
+
+regressor.add(LSTM(units=50))
+regressor.add(Dropout(0.2))
+
+regressor.add(Dense(units=1))
+
+regressor.compile(optimizer='adam', loss='mean_squared_error')
+
+regressor.fit(new_X_train, new_y_train, epochs=100, batch_size=32)
+
+dataset_test = y_test.values
+
+class LSTM(object):
     def __init__(self, **kwargs):
         self.output_dim = 1
         self.xscaler = StandardScaler()
@@ -62,12 +133,12 @@ class DenseNN(object):
         self.yscaler = StandardScaler()
 
 
-        model = keras.models.Sequential()
+        model = Sequential()
+
         self.cfg = kwargs
         hidden_nodes = self.cfg.get('hidden_nodes')
 
-        model.add(keras.layers.Dense(hidden_nodes[0],
-                                     activation='tanh'))
+        model.add(LSTM(units=50, return_sequences=True, input_shape=2))
         model.add(keras.layers.BatchNormalization())
         model.add(Dropout(self.cfg.get('dropout', None)))
 
@@ -81,6 +152,9 @@ class DenseNN(object):
 
         model.compile(loss=self.cfg.get('loss'), optimizer=opt)
         self.model = model
+
+        # A callback is a set of functions to be applied at given stages of the training procedure.
+        # You can use callbacks to get a view on internal states and statistics of the model during training.
 
         self.callbacks = [keras.callbacks.EarlyStopping(monitor='val_loss',
                                                         min_delta=1e-2, patience=100, verbose=0, mode='auto',
@@ -144,7 +218,7 @@ config = dict(hidden_nodes=(64,),
               batch_size=90,
               loss='mse')
 
-m = DenseNN(**config)
+m = LSTM(**config)
 hist = m.fit(X_train, y_train, X_valid, y_valid)
 
 #Saving the feature scaling settings for later
@@ -184,29 +258,31 @@ m.xscaler.fit_transform(X_train.values)
 m.yscaler.fit_transform(y_train.values.reshape(-1, m.output_dim))
 
 y_pred_train = m.predict(X_train)
-y_pred_valid = m.predict(X_valid)
-y_pred_test = m.predict(X_test)
+#You may need to rewrite this function, you want the prediction to be based on the previous day's discharge
+y_pred_train = generate_prediction_array(y_pred_train, y_orig, forecast_range=14)
 
-y_pred_test = np.concatenate(([y_orig.sel(time='2012-01-01').values], y_pred_test)).cumsum()
+
+y_pred_valid = m.predict(X_valid)
+y_pred_valid = generate_prediction_array(y_pred_valid, y_orig, forecast_range=30)
+
+y_pred_test = m.predict(X_test)
+#y_pred_test = generate_prediction_array(y_pred_test, y_orig, forecast_range=30)
+
+period_case = dict(time=slice('2015-10-12', '2015-10-13'))
+X_case, y_case = Xda.loc[period_case], yda.loc[period_case]
+
+y_pred_case = m.predict(X_case)
+y_pred_case = generate_prediction_array(y_pred_case, y_orig, forecast_range=2)
+
 
 #Trying to remove this generate_prediction_array function, add a function where we loop through the function and predict the future values
-#We have to concatenate and call the cumulative sum in order to revert to the orginal function as we have been predicting the variation of discharge
-plt.plot(y_pred_test)
-
-plt.plot(np.concatenate(([y_orig.sel(time='2012-01-01').values], y_test)).cumsum())
+np.concatenate(([y_orig[0].values], y_pred_test)).cumsum()
 
 
-
-"""
 from functions.plot import plot_multif_prediction
 title='Setting: Time-Delay Neural Net: 64 hidden nodes, dropout 0.25'
 plot_multif_prediction(y_pred_test, y_orig, forecast_range=30, title=title)
 plt.savefig('./images/test/multif_prediction.png', dpi=600)
-
-"""
-
-
-
 
 
 

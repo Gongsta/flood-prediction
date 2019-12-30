@@ -24,7 +24,7 @@ config:
           scale: 1.0
           seed: null
       kernel_regularizer: null
-      name: dense_3
+      name: dense_1
       trainable: true
       units: 64
       use_bias: true
@@ -51,13 +51,13 @@ config:
       moving_variance_initializer:
         class_name: Ones
         config: {}
-      name: batch_normalization_2
+      name: batch_normalization_1
       scale: true
       trainable: true
   - class_name: Dropout
     config:
       dtype: float32
-      name: dropout_2
+      name: dropout_1
       noise_shape: null
       rate: 0.25
       seed: null
@@ -81,9 +81,9 @@ config:
           scale: 1.0
           seed: null
       kernel_regularizer: null
-      name: dense_4
+      name: dense_2
       trainable: true
       units: 1
       use_bias: true
-  name: sequential_2
+  name: sequential_1
 keras_version: 2.3.1

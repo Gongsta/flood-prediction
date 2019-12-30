@@ -11,51 +11,49 @@ from dask.distributed import Client, LocalCluster
 client = Client("tcp://169.45.50.121:8786")
 print(client.scheduler_info()['services'])
 
-#This line of code connects the client to a remote cluster
-#client = Client("tcp://192.168.0.112:8786")  # memory_limit='16GB',
 
+#SAVING THE DATASET
+#era5_loaded = xr.open_mfdataset('/Volumes/portableHardDisk/data/Elbe/reanalysis-era5-single-levels_convective_precipitation,land_sea_mask,large_scale_precipitation,runoff,slope_of_sub_gridscale_orography,soil_type,total_column_water_vapour,volumetric_soil_water_layer_1,volumetric_soil_water_layer_2_*_*.nc', combine='by_coords', chunks={'latitude':4, 'longitude':4,'time':4})
+#glofas_loaded = xr.open_mfdataset('/Volumes/portableHardDisk/data/*/CEMS_ECMWF_dis24_*_glofas_v2.1.nc', combine='by_coords')
 
+#era5_loaded = era5_loaded.chunk(25)
 
-era5_loaded = xr.open_mfdataset('/Volumes/portableHardDisk/data/Elbe/reanalysis-era5-single-levels_convective_precipitation,land_sea_mask,large_scale_precipitation,runoff,slope_of_sub_gridscale_orography,soil_type,total_column_water_vapour,volumetric_soil_water_layer_1,volumetric_soil_water_layer_2_*_*.nc', combine='by_coords', chunks={'latitude':4, 'longitude':4,'time':4})
-glofas_loaded = xr.open_mfdataset('/Volumes/portableHardDisk/data/*/CEMS_ECMWF_dis24_*_glofas_v2.1.nc', combine='by_coords')
-
-era5_loaded = era5_loaded.chunk(25)
-
-era5_loaded.to_zarr('/Volumes/Seagate Backup Plus Drive/weatherdata/Elbe', consolidated=True)
-glofas_loaded.to_zarr('/Volumes/Seagate Backup Plus Drive/weatherdata/glofas', consolidated=True)
+#era5_loaded.to_zarr('/Volumes/Seagate Backup Plus Drive/weatherdata/Elbe', consolidated=True)
+#glofas_loaded.to_zarr('/Volumes/Seagate Backup Plus Drive/weatherdata/glofas', consolidated=True)
 
 #Call this in console
 #gcloud auth login
 #gsutil -m cp -r /Volumes/portableHardDisk/weatherdata/Elbe/ gs://weather-data-copernicus/
 #gsutil -m cp -r /Volumes/portableHardDisk/weatherdata/glofas/ gs://weather-data-copernicus/
 
+#If the command fails during the upload, and you've waited for 4 hours or more.., you can upload simply the missing files by calling
+#gsutil rsync /Volumes/portableHardDisk/weatherdata/Elbe/ gs://weather-data-copernicus/ . Found the information here https://readthedocs.org/projects/gcsfs/downloads/pdf/stable/
+
+
+
+#Loading the dataset
+
+
+#Does not work, takes too much time to load
+"""
 #this is suggested in the pangeo documentation
 import xarray as xr
 import fsspec
 ds = xr.open_zarr(fsspec.get_mapper('gcs://weather-data-copernicus/Elbe'))
 #ds = xr.open_zarr('/Volumes/Seagate Backup Plus Drive/weatherdata/glofas')
-
-#This is from the original xarray documentation
+"""
 
 import gcsfs
 from gcsfs import GCSFileSystem
-gcs = GCSFileSystem(project="flood-prediction-263210", token='anon')
-gcsmap = gcsfs.mapping.GCSMap('weather-data-copernicus', gcs=gcs, check=True, create=False)
-ds_gcs = xr.open_zarr(gcsmap)
-
-
-#dask_function(..., storage_options={'token': gcs.session.credentials})
-
-file = gcs.open('gcs://weather-data-copernicus/data/Elbe/reanalysis-era5-single-levels_convective_precipitation,land_sea_mask,large_scale_precipitation,runoff,slope_of_sub_gridscale_orography,soil_type,total_column_water_vapour,volumetric_soil_water_layer_1,volumetric_soil_water_layer_2_1999_01.nc')
-#This allows me to read the file from the cloud
-ds = xr.open_mfdataset(file, engine='h5netcdf')
-#Loading our data located in a remote disk
-#The open_mfdataset function automatically combines the many .nc files thanks to the power of Dask, which opens the files in parallel, the file aren't loaded until .compute() is called
-era5_loaded = xr.open_mfdataset('/Volumes/Seagate Backup Plus Drive/data/Elbe/reanalysis-era5-single-levels_convective_precipitation,land_sea_mask,large_scale_precipitation,runoff,slope_of_sub_gridscale_orography,soil_type,total_column_water_vapour,volumetric_soil_water_layer_1,volumetric_soil_water_layer_2_*_*.nc', combine='by_coords')
-glofas_loaded = xr.open_mfdataset('/Volumes/Seagate Backup Plus Drive/data/*/CEMS_ECMWF_dis24_*_glofas_v2.1.nc', combine='by_coords')
+fs = GCSFileSystem(project="flood-prediction-263210", token='cache')
+gcsmapglofas = gcsfs.mapping.GCSMap('weather-data-copernicus/glofas', gcs=fs, check=True, create=False)
+glofas_loaded = xr.open_zarr(gcsmapglofas)
+gcsmapElbe = gcsfs.mapping.GCSMap('weather-data-copernicus/Elbe', gcs=fs, check=True, create=False)
+era5_loaded = xr.open_zarr(gcsmapElbe)
 
 
 era5_loaded = client.persist(era5_loaded)
+glofas_loaded = client.persist(glofas_loaded)
 #DATA PREPROCESSING
 
 #Doing this for debugging purposes

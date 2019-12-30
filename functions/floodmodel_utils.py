@@ -296,7 +296,7 @@ def generate_prediction_array(y_pred, y_reana, forecast_range=14):
     pred_multif_data = new_pred.values.reshape([num_forecasts, (forecast_range+1)])
     # set init to reanalysis value
     pred_multif_data[:, 0] = y_reana.where(new_pred)[0::(forecast_range+1)].values
-    # cumulative sum to accumulate the forecasted change
+    # cumulative sum to accumulate the forecasted change. This allows us to return to the original plot
     pred_multif_data_fin = np.cumsum(pred_multif_data, axis=1)
 
     pred_multif = xr.DataArray(pred_multif_data_fin,
