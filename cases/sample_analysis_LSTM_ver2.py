@@ -151,7 +151,7 @@ y_pred_valid = sc.inverse_transform(y_pred_valid)
 #Making the predictions on the test set (where there was a flood event)
 dataset_total_2 = np.concatenate((dataset_valid, dataset_test))
 
-input = dataset_total_2[len(dataset_total_2)-len(dataset_test)-60:]
+inputs = dataset_total_2[len(dataset_total_2)-len(dataset_test)-60:]
 inputs = inputs.reshape(-1,1)
 inputs = sc.transform(inputs)
 y_test = []
@@ -173,7 +173,7 @@ y_pred_test = sc.inverse_transform(y_pred_test)
 
 import matplotlib.pyplot as plt
 
-#Plotting the predicted values
+#Plotting the validation predicted values
 #Since the current predicted y values are the difference of discharge, we will call the cumsum() function to revert to the original discharge values. We will need the first previous
 #day's value, i.e. 2005-12-31, but we will remove this value in the next line of code
 y_pred_valid = np.concatenate(([y_orig.sel(time='2005-12-31').values], y_pred_valid.reshape(-1))).cumsum()
@@ -182,14 +182,31 @@ y_pred_valid = np.delete(y_pred_valid, 0)
 y_pred_valid_xr = xr.DataArray(y_pred_valid, dims=('time'), coords={'time': dataset_valid.time.values})
 y_pred_valid_xr.plot()
 
-#Plotting the real values
+#Plotting the real validation values
 y_valid = np.concatenate(([y_orig.sel(time='2005-12-31').values], y_valid)).cumsum()
 y_valid = np.delete(y_valid, 0)
 y_valid_xr = xr.DataArray(y_valid, dims=('time'), coords={'time': dataset_valid.time.values})
 y_valid_xr.plot()
 plt.title('LSTM model prediction trained on time values from 1981-2005')
-plt.savefig('./images/sampleanalysis/LSTM_discharge_without_feature-scaling.png', dpi=600)
+plt.savefig('./images/sampleanalysis/LSTM_discharge_validationdata.png', dpi=600)
 
+
+
+
+#Plotting the test predicated values
+y_pred_test = np.concatenate(([y_orig.sel(time='2011-12-31').values], y_pred_test.reshape(-1))).cumsum()
+#We delete the value at the first index of the array since that value represents the value at time 2005-12-31, which we are not interested in.
+y_pred_test = np.delete(y_pred_test, 0)
+y_pred_test_xr = xr.DataArray(y_pred_test, dims=('time'), coords={'time': dataset_test.time.values})
+y_pred_test_xr.plot()
+
+#Plotting the real test values
+y_test = np.concatenate(([y_orig.sel(time='2011-12-31').values], y_test)).cumsum()
+y_test = np.delete(y_test, 0)
+y_test_xr = xr.DataArray(y_test, dims=('time'), coords={'time': dataset_test.time.values})
+y_test_xr.plot()
+plt.title('LSTM model prediction trained on time values from 1981-2005')
+plt.savefig('./images/sampleanalysis/LSTM_discharge_testdata.png', dpi=600)
 
 
 #Dataset_valid is missing one time coordinate since the difference of time removes one time element

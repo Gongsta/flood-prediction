@@ -150,7 +150,7 @@ y_pred_valid = sc.inverse_transform(y_pred_valid)
 #Making the predictions on the test set (where there was a flood event)
 dataset_total_2 = np.concatenate((dataset_valid, dataset_test))
 
-input = dataset_total_2[len(dataset_total_2)-len(dataset_test)-60:]
+inputs = dataset_total_2[len(dataset_total_2)-len(dataset_test)-60:]
 inputs = inputs.reshape(-1,1)
 inputs = sc.transform(inputs)
 y_test = []
@@ -158,9 +158,11 @@ X_test = []
 
 for i in range(60, len(inputs)):
     X_test.append(inputs[i-60:i, 0])
-    y_test.append(inputs[i,0])
+    y_test.append(inputs[i,0]) #This was unnecessary I realized later..
 
 X_test, y_test = np.array(X_test), np.array(y_test)
+X_test.shape
+#(
 
 X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
 
