@@ -12,27 +12,27 @@ client = Client("tcp://169.45.50.121:8786")
 print(client.scheduler_info()['services'])
 
 
-#SAVING THE DATASET
-#era5_loaded = xr.open_mfdataset('/Volumes/portableHardDisk/data/Elbe/reanalysis-era5-single-levels_convective_precipitation,land_sea_mask,large_scale_precipitation,runoff,slope_of_sub_gridscale_orography,soil_type,total_column_water_vapour,volumetric_soil_water_layer_1,volumetric_soil_water_layer_2_*_*.nc', combine='by_coords', chunks={'latitude':4, 'longitude':4,'time':4})
-#glofas_loaded = xr.open_mfdataset('/Volumes/portableHardDisk/data/*/CEMS_ECMWF_dis24_*_glofas_v2.1.nc', combine='by_coords')
-
-#era5_loaded = era5_loaded.chunk(25)
-
-#era5_loaded.to_zarr('/Volumes/Seagate Backup Plus Drive/weatherdata/Elbe', consolidated=True)
-#glofas_loaded.to_zarr('/Volumes/Seagate Backup Plus Drive/weatherdata/glofas', consolidated=True)
-
-#Call this in console
-#gcloud auth login
-#gsutil -m cp -r /Volumes/portableHardDisk/weatherdata/Elbe/ gs://weather-data-copernicus/
-#gsutil -m cp -r /Volumes/portableHardDisk/weatherdata/glofas/ gs://weather-data-copernicus/
-
-#If the command fails during the upload, and you've waited for 4 hours or more.., you can upload simply the missing files by calling
-#gsutil rsync /Volumes/portableHardDisk/weatherdata/Elbe/ gs://weather-data-copernicus/ . Found the information here https://readthedocs.org/projects/gcsfs/downloads/pdf/stable/
-
+# #SAVING THE DATASET
+# era5_loaded = xr.open_mfdataset('/Volumes/portableHardDisk/data/Elbe/reanalysis-era5-single-levels_convective_precipitation,land_sea_mask,large_scale_precipitation,runoff,slope_of_sub_gridscale_orography,soil_type,total_column_water_vapour,volumetric_soil_water_layer_1,volumetric_soil_water_layer_2_*_*.nc', combine='by_coords', chunks={'latitude':4, 'longitude':4,'time':4})
+# glofas_loaded = xr.open_mfdataset('/Volumes/portableHardDisk/data/*/CEMS_ECMWF_dis24_*_glofas_v2.1.nc', combine='by_coords')
+#
+# era5_loaded = era5_loaded.chunk(25)
+#
+# era5_loaded.to_zarr('/Volumes/Seagate Backup Plus Drive/weatherdata/Elbe', consolidated=True)
+# glofas_loaded.to_zarr('/Volumes/Seagate Backup Plus Drive/weatherdata/glofas', consolidated=True)
+#
+# #Call this in console
+# #gcloud auth login
+# #gsutil -m cp -r /Volumes/portableHardDisk/weatherdata/Elbe/ gs://weather-data-copernicus/
+# #gsutil -m cp -r /Volumes/portableHardDisk/weatherdata/glofas/ gs://weather-data-copernicus/
+#
+# If the command fails during the upload, and you've waited for 4 hours or more.., you can upload simply the missing files by calling
+# gsutil rsync /Volumes/portableHardDisk/weatherdata/Elbe/ gs://weather-data-copernicus/ . Found the information here https://readthedocs.org/projects/gcsfs/downloads/pdf/stable/
+#
+#
 
 
 #Loading the dataset
-
 
 #Does not work, takes too much time to load
 """

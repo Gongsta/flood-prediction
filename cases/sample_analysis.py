@@ -8,12 +8,10 @@ import numpy as np
 
 from dask.distributed import Client, LocalCluster
 
+#Using a local cluster
 cluster = LocalCluster()  # n_workers=10, threads_per_worker=1,
 client = Client()
 print(client.scheduler_info()['services'])
-
-#Connecting my client to the cluster does not work :((
-#client = Client("tcp://192.168.0.112:8786")  # memory_limit='16GB',
 
 
 #Loading our data
