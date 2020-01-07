@@ -1,0 +1,1 @@
+#This 3rd version of the LSTM incorporates the many other variables such as precipitation into the model

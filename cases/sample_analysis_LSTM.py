@@ -73,16 +73,14 @@ y_train = []
 #Applying feature scaling
 from sklearn.preprocessing import MinMaxScaler
 sc = MinMaxScaler(feature_range=(0,1))
-#Not working because of dimensionality issues, to be fixed later..
-#dataset_train.values.reshape(1, -1)
-#dataset_train = sc.fit_transform(dataset_train)
+dataset_train_scaled = sc.fit_transform(dataset_train.values.reshape(-1, 1))
 
 for i in range(60, len(dataset_train)):
     #OR DO
     #    new_X_train.append(X_train[i-60:i,0]) ? It keeps the xarrays
 
-    X_train.append(dataset_train.values[i-60:i])
-    y_train.append(dataset_train.values[i])
+    X_train.append(dataset_train_scaled[i-60:i,0])
+    y_train.append(dataset_train_scaled[i,0])
 
 X_train, y_train = np.array(X_train), np.array(y_train)
 
@@ -124,18 +122,20 @@ regressor.compile(optimizer='adam', loss='mean_squared_error')
 regressor.fit(X_train, y_train, epochs=100, batch_size=32)
 
 
-#Fitting the test values on the model
+#Making the predictions on the validation set
 dataset_total = np.concatenate((dataset_train, dataset_valid))
 
 #To test our model on the test set, we will need to use part of the training set. More specifically, since our model has been trained on the
 #60 previous days, we will need exactly 60 days out of the training set, in addition to all of the test set.
 inputs = dataset_total[len(dataset_total)-len(dataset_valid)-60:]
+inputs = inputs.reshape(-1,1)
+inputs = sc.transform(inputs)
 y_valid = []
 X_valid = []
 
 for i in range(60, len(inputs)):
-    X_valid.append(inputs[i-60:i])
-    y_valid.append(inputs[i])
+    X_valid.append(inputs[i-60:i, 0])
+    y_valid.append(inputs[i, 0])
 
 
 X_valid, y_valid = np.array(X_valid), np.array(y_valid)
@@ -144,28 +144,68 @@ X_valid, y_valid = np.array(X_valid), np.array(y_valid)
 X_valid = np.reshape(X_valid, (X_valid.shape[0], X_valid.shape[1], 1))
 
 y_pred_valid = regressor.predict(X_valid)
+y_pred_valid = sc.inverse_transform(y_pred_valid)
 
+
+#Making the predictions on the test set (where there was a flood event)
+dataset_total_2 = np.concatenate((dataset_valid, dataset_test))
+
+input = dataset_total_2[len(dataset_total_2)-len(dataset_test)-60:]
+inputs = inputs.reshape(-1,1)
+inputs = sc.transform(inputs)
+y_test = []
+X_test = []
+
+for i in range(60, len(inputs)):
+    X_test.append(inputs[i-60:i, 0])
+    y_test.append(inputs[i,0])
+
+X_test, y_test = np.array(X_test), np.array(y_test)
+
+X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
+
+y_pred_test = regressor.predict(X_test)
+y_pred_test = sc.inverse_transform(y_pred_test)
+
+
+#See your results!
 import matplotlib.pyplot as plt
 
-#Plotting the predicted values
-y_pred_valid = np.concatenate(([y_orig.sel(time='2006-01-01').values], y_pred_valid.reshape(-1))).cumsum()
-#Plotting the real values
-y_valid = np.concatenate(([y_orig.sel(time='2006-01-01').values], y_valid)).cumsum()
-
-
-
-plt.plot(y_pred_valid)
-plt.plot(y_valid)
-plt.savefig('./images/sampleanalysis/LSTM_difference_of_discharge_without_feature-scaling.png', dpi=600)
-
-#Remember that y_train is a DataArray of the difference of discharge values, y_train_original returns the original values of discharge
-y_train_original = np.concatenate(([y_orig[0].values], y_train.values)).cumsum()
-
-
-#Dataset_valid is missing one time coordinate since the difference of time removes one time element
+#Plotting the validation predicted values
+#Since the current predicted y values are the difference of discharge, we will call the cumsum() function to revert to the original discharge values. We will need the first previous
+#day's value, i.e. 2005-12-31, but we will remove this value in the next line of code
+y_pred_valid = np.concatenate(([y_orig.sel(time='2005-12-31').values], y_pred_valid.reshape(-1))).cumsum()
+#We delete the value at the first index of the array since that value represents the value at time 2005-12-31, which we are not interested in.
+y_pred_valid = np.delete(y_pred_valid, 0)
 y_pred_valid_xr = xr.DataArray(y_pred_valid, dims=('time'), coords={'time': dataset_valid.time.values})
-y_ored_valid_xr.plot()
-#
+y_pred_valid_xr.plot()
+
+#Plotting the real values
+y_valid = np.concatenate(([y_orig.sel(time='2005-12-31').values], y_valid)).cumsum()
+y_valid = np.delete(y_valid, 0)
+y_valid_xr = xr.DataArray(y_valid, dims=('time'), coords={'time': dataset_valid.time.values})
+y_valid_xr.plot()
+plt.title('LSTM model prediction trained on time values from 1981-2005')
+plt.savefig('./images/sampleanalysis/LSTM_difference_of_discharge_validationdata.png', dpi=600)
+
+
+#Plotting the test predicated values
+y_pred_test = np.concatenate(([y_orig.sel(time='2011-12-31').values], y_pred_test.reshape(-1))).cumsum()
+#We delete the value at the first index of the array since that value represents the value at time 2005-12-31, which we are not interested in.
+y_pred_test = np.delete(y_pred_test, 0)
+y_pred_test_xr = xr.DataArray(y_pred_test, dims=('time'), coords={'time': dataset_test.time.values})
+y_pred_test_xr.plot()
+
+#Plotting the real values
+y_test = np.concatenate(([y_orig.sel(time='2011-12-31').values], y_test)).cumsum()
+y_test = np.delete(y_test, 0)
+y_test_xr = xr.DataArray(y_test, dims=('time'), coords={'time': dataset_test.time.values})
+y_test_xr.plot()
+plt.title('LSTM model prediction trained on time values from 1981-2005')
+plt.savefig('./images/sampleanalysis/LSTM_difference_of_discharge_testdata.png', dpi=600)
+
+
+
 # class LSTM(object):
 #     def __init__(self, **kwargs):
 #         self.output_dim = 1
