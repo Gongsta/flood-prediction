@@ -65,7 +65,7 @@ glofas['dis24'].isel(time=1).plot()
 plt.savefig('./images/Elbe/1999_glofas_Elbe_basin', dpi=600)
 
 
- ,,era5['lsp'].isel(time=1).plot()
+era5['lsp'].isel(time=1).plot()
 plt.savefig('./images/Elbe/era5_Elbe_basin', dpi=600)
 
 #Visualizing the region from 1999-2019

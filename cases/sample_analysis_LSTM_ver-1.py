@@ -1,4 +1,4 @@
-#This model computes the variation of discharge
+#This model computes the variation of discharge without feature scaling. It was the first one I created
 #Somehow, applying feature scaling makes it overfit...
 import sys
 sys.path.append('/Users/stevengong/Desktop/flood-prediction')
@@ -72,19 +72,13 @@ import numpy as np
 X_train = []
 y_train = []
 
-#Applying feature scaling
-from sklearn.preprocessing import MinMaxScaler
-sc = MinMaxScaler(feature_range=(0,1))
-#I need to reshape the dataset as an input for the standard scaler
-#It goes from [2,5,6,7,4] to [[2],[5],[6],[7],[4]]
-dataset_train_scaled = sc.fit_transform(dataset_train.values.reshape(-1, 1))
 
-for i in range(60, len(dataset_train_scaled)):
+for i in range(60, len(dataset_train)):
     #OR DO
     #    new_X_train.append(X_train[i-60:i,0]) ? It keeps the xarrays
 
-    X_train.append(dataset_train_scaled[i-60:i,0])
-    y_train.append(dataset_train_scaled[i,0])
+    X_train.append(dataset_train[i-60:i])
+    y_train.append(dataset_train[i])
 
 X_train, y_train = np.array(X_train), np.array(y_train)
 
@@ -127,41 +121,18 @@ regressor.fit(X_train, y_train, epochs=100, batch_size=32)
 
 
 
-# serialize model to YAML
-regressor_yaml = regressor.to_yaml()
-with open("./models/sample-analysis/LSTM1.yaml", "w") as yaml_file:
-    yaml_file.write(regressor_yaml)
-# serialize weights to HDF5
-regressor.save_weights("./models/sample-analysis/LSTM1.h5")
-#Seialize feature scaling weights
-
-
-#LATER ON... LOADING THE WEIGHTS
-regressor_model = open('./models/sample-analysis/LSTM1.yaml', 'r').read()
-from keras.models import model_from_yaml
-loaded_regressor = model_from_yaml(regressor_model)
-loaded_regressor.load_weights('./models/sample-analysis/LSTM1.h5')
-regressor = loaded_regressor
-
-
-
-
-
-
 #Making the predictions on the validation set
 dataset_total = np.concatenate((dataset_train, dataset_valid))
 
 #To test our model on the test set, we will need to use part of the training set. More specifically, since our model has been trained on the
 #60 previous days, we will need exactly 60 days out of the training set, in addition to all of the test set.
 inputs = dataset_total[len(dataset_total)-len(dataset_valid)-60:]
-inputs = inputs.reshape(-1,1)
-inputs = sc.transform(inputs)
 y_valid = []
 X_valid = []
 
 for i in range(60, len(inputs)):
-    X_valid.append(inputs[i-60:i, 0])
-    y_valid.append(inputs[i, 0])
+    X_valid.append(inputs[i-60:i])
+    y_valid.append(inputs[i])
 
 
 X_valid, y_valid = np.array(X_valid), np.array(y_valid)
@@ -170,15 +141,12 @@ X_valid, y_valid = np.array(X_valid), np.array(y_valid)
 X_valid = np.reshape(X_valid, (X_valid.shape[0], X_valid.shape[1], 1))
 
 y_pred_valid = regressor.predict(X_valid)
-y_pred_valid = sc.inverse_transform(y_pred_valid)
 
 
 #Making the predictions on the test set (where there was a flood event)
 dataset_total_2 = np.concatenate((dataset_valid, dataset_test))
 
 inputs = dataset_total_2[len(dataset_total_2)-len(dataset_test)-60:]
-inputs = inputs.reshape(-1,1)
-inputs = sc.transform(inputs)
 y_test = []
 X_test = []
 
@@ -193,7 +161,6 @@ X_test.shape
 X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
 
 y_pred_test = regressor.predict(X_test)
-y_pred_test = sc.inverse_transform(y_pred_test)
 
 
 #See your results!
@@ -206,16 +173,15 @@ y_pred_valid = np.concatenate(([y_orig.sel(time='2005-12-31').values], y_pred_va
 #We delete the value at the first index of the array since that value represents the value at time 2005-12-31, which we are not interested in.
 y_pred_valid = np.delete(y_pred_valid, 0)
 y_pred_valid_xr = xr.DataArray(y_pred_valid, dims=('time'), coords={'time': dataset_valid.time.values})
-y_pred_valid_xr.plot(label = 'Predicted discharge')
+y_pred_valid_xr.plot()
 
 #Plotting the real values
 y_valid = sc.inverse_transform(y_valid.reshape(-1,1))
 y_valid = np.concatenate(([y_orig.sel(time='2005-12-31').values], y_valid.reshape(-1))).cumsum()
 y_valid = np.delete(y_valid, 0)
 y_valid_xr = xr.DataArray(y_valid, dims=('time'), coords={'time': dataset_valid.time.values})
-y_valid_xr.plot(label='True discharge')
+y_valid_xr.plot()
 plt.title('LSTM model prediction trained on time values from 1981-2005 with feature scaling')
-plt.legend(loc='upper left')
 plt.savefig('./images/sampleanalysis/LSTM_difference_of_discharge_validationdata.png', bbox_inches='tight', dpi=600)
 
 
@@ -224,17 +190,16 @@ y_pred_test = np.concatenate(([y_orig.sel(time='2011-12-31').values], y_pred_tes
 #We delete the value at the first index of the array since that value represents the value at time 2005-12-31, which we are not interested in.
 y_pred_test = np.delete(y_pred_test, 0)
 y_pred_test_xr = xr.DataArray(y_pred_test, dims=('time'), coords={'time': dataset_test.time.values})
-y_pred_test_xr.plot(label= "Predicted discharge")
+y_pred_test_xr.plot()
 
 #Plotting the real values
 y_test = sc.inverse_transform(y_test.reshape(-1,1))
 y_test = np.concatenate(([y_orig.sel(time='2011-12-31').values], y_test.reshape(-1))).cumsum()
 y_test = np.delete(y_test, 0)
 y_test_xr = xr.DataArray(y_test, dims=('time'), coords={'time': dataset_test.time.values})
-y_test_xr.plot(label='True discharge')
+y_test_xr.plot()
 plt.title('LSTM model prediction trained on time values from 1981-2005 with feature scaling')
-plt.legend(loc='upper left')
-plt.savefig('./images/sampleanalysis/LSTM_difference_of_discharge_testdata.png', bbox_inches='tight', dpi=600)
+plt.savefig('./images/sampleanalysis/LSTM_difference_of_discharge_testdata.png', dpi=600)
 
 
 

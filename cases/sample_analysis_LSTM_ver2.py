@@ -1,3 +1,4 @@
+#This second version directly calculates the discharge instead of the variation of discharge
 import sys
 sys.path.append('/Users/stevengong/Desktop/flood-prediction')
 from functions.floodmodel_utils import get_basin_mask, shift_and_aggregate, generate_prediction_array, reshape_scalar_predictand
@@ -122,6 +123,40 @@ regressor.compile(optimizer='adam', loss='mean_squared_error')
 regressor.fit(X_train, y_train, epochs=100, batch_size=32)
 
 
+
+
+
+# serialize model to YAML
+regressor_yaml = regressor.to_yaml()
+with open("./models/sample-analysis/LSTM2.yaml", "w") as yaml_file:
+    yaml_file.write(regressor_yaml)
+# serialize weights to HDF5
+regressor.save_weights("./models/sample-analysis/LSTM2.h5")
+#Seialize feature scaling weights
+
+
+#LATER ON... LOADING THE WEIGHTS
+regressor_model = open('./models/sample-analysis/LSTM2.yaml', 'r').read()
+from keras.models import model_from_yaml
+loaded_regressor = model_from_yaml(regressor_model)
+loaded_regressor.load_weights('./models/sample-analysis/LSTM2.h5')
+regressor = loaded_regressor
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #Fitting the test values on the model
 dataset_total = np.concatenate((dataset_train, dataset_valid))
 
@@ -145,7 +180,7 @@ X_valid = np.reshape(X_valid, (X_valid.shape[0], X_valid.shape[1], 1))
 
 y_pred_valid = regressor.predict(X_valid)
 y_pred_valid = sc.inverse_transform(y_pred_valid)
-
+y_valid = sc.inverse_transform(y_valid.reshape(-1,1))
 
 
 #Making the predictions on the test set (where there was a flood event)
@@ -167,6 +202,7 @@ X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
 
 y_pred_test = regressor.predict(X_test)
 y_pred_test = sc.inverse_transform(y_pred_test)
+y_test = sc.inverse_transform(y_test.reshape(-1,1))
 
 
 #See your results!
@@ -174,38 +210,29 @@ y_pred_test = sc.inverse_transform(y_pred_test)
 import matplotlib.pyplot as plt
 
 #Plotting the validation predicted values
-#Since the current predicted y values are the difference of discharge, we will call the cumsum() function to revert to the original discharge values. We will need the first previous
-#day's value, i.e. 2005-12-31, but we will remove this value in the next line of code
-y_pred_valid = np.concatenate(([y_orig.sel(time='2005-12-31').values], y_pred_valid.reshape(-1))).cumsum()
-#We delete the value at the first index of the array since that value represents the value at time 2005-12-31, which we are not interested in.
-y_pred_valid = np.delete(y_pred_valid, 0)
-y_pred_valid_xr = xr.DataArray(y_pred_valid, dims=('time'), coords={'time': dataset_valid.time.values})
-y_pred_valid_xr.plot()
+y_pred_valid_xr = xr.DataArray(y_pred_valid.reshape(-1), dims=('time'), coords={'time': dataset_valid.time.values})
+y_pred_valid_xr.plot(label="Predicted discharge", figsize=(15,5))
 
 #Plotting the real validation values
-y_valid = np.concatenate(([y_orig.sel(time='2005-12-31').values], y_valid)).cumsum()
-y_valid = np.delete(y_valid, 0)
-y_valid_xr = xr.DataArray(y_valid, dims=('time'), coords={'time': dataset_valid.time.values})
-y_valid_xr.plot()
+y_valid_xr = xr.DataArray(y_valid.reshape(-1), dims=('time'), coords={'time': dataset_valid.time.values})
+y_valid_xr.plot(label='True discharge')
 plt.title('LSTM model prediction trained on time values from 1981-2005')
+plt.legend(loc="upper left")
 plt.savefig('./images/sampleanalysis/LSTM_discharge_validationdata.png', dpi=600)
 
 
 
 
 #Plotting the test predicated values
-y_pred_test = np.concatenate(([y_orig.sel(time='2011-12-31').values], y_pred_test.reshape(-1))).cumsum()
-#We delete the value at the first index of the array since that value represents the value at time 2005-12-31, which we are not interested in.
-y_pred_test = np.delete(y_pred_test, 0)
-y_pred_test_xr = xr.DataArray(y_pred_test, dims=('time'), coords={'time': dataset_test.time.values})
-y_pred_test_xr.plot()
+
+y_pred_test_xr = xr.DataArray(y_pred_test.reshape(-1), dims=('time'), coords={'time': dataset_test.time.values})
+y_pred_test_xr.plot(label="Predicted discharge", figsize=(15,5))
 
 #Plotting the real test values
-y_test = np.concatenate(([y_orig.sel(time='2011-12-31').values], y_test)).cumsum()
-y_test = np.delete(y_test, 0)
-y_test_xr = xr.DataArray(y_test, dims=('time'), coords={'time': dataset_test.time.values})
-y_test_xr.plot()
+y_test_xr = xr.DataArray(y_test.reshape(-1), dims=('time'), coords={'time': dataset_test.time.values})
+y_test_xr.plot(label="True discharge")
 plt.title('LSTM model prediction trained on time values from 1981-2005')
+plt.legend(loc='upper left')
 plt.savefig('./images/sampleanalysis/LSTM_discharge_testdata.png', dpi=600)
 
 
