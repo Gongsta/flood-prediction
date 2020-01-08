@@ -89,7 +89,7 @@ for i in range(days_intake_length, len(dataset_train)-forecast_day):
     #    new_X_train.append(X_train[i-60:i,0]) ? It keeps the xarrays
 
     X_train.append(dataset_train_scaled[i-days_intake_length:i, 0])
-    y_train.append(dataset_train_scaled[i+forecast_day, 0])
+    y_train.append(dataset_train_scaled[i:i+forecast_day, 0])
 
 X_train, y_train = np.array(X_train), np.array(y_train)
 
@@ -122,7 +122,7 @@ regressor.add(Dropout(0.1))
 regressor.add(LSTM(units=50))
 regressor.add(Dropout(0.1))
 
-regressor.add(Dense(units=1))
+regressor.add(Dense(units=14))
 
 regressor.compile(optimizer='adam', loss='mean_squared_error')
 
@@ -136,18 +136,18 @@ regressor.fit(X_train, y_train, epochs=100, batch_size=32)
 
 # serialize model to YAML
 regressor_yaml = regressor.to_yaml()
-with open("./models/sample-analysis/LSTM4.yaml", "w") as yaml_file:
+with open("./models/sample-analysis/LSTM5.yaml", "w") as yaml_file:
     yaml_file.write(regressor_yaml)
 # serialize weights to HDF5
-regressor.save_weights("./models/sample-analysis/LSTM4.h5")
+regressor.save_weights("./models/sample-analysis/LSTM5.h5")
 #Seialize feature scaling weights
 
 
 #LATER ON... LOADING THE WEIGHTS
-regressor_model = open('./models/sample-analysis/LSTM4.yaml', 'r').read()
+regressor_model = open('./models/sample-analysis/LSTM5.yaml', 'r').read()
 from keras.models import model_from_yaml
 loaded_regressor = model_from_yaml(regressor_model)
-loaded_regressor.load_weights('./models/sample-analysis/LSTM4.h5')
+loaded_regressor.load_weights('./models/sample-analysis/LSTM5.h5')
 regressor = loaded_regressor
 
 
@@ -167,7 +167,7 @@ X_valid = []
 
 for i in range(days_intake_length, len(inputs)-forecast_day):
     X_valid.append(inputs[i-days_intake_length:i, 0])
-    y_valid.append(inputs[i+forecast_day, 0])
+    y_valid.append(inputs[i:i+forecast_day, 0])
 
 
 X_valid, y_valid = np.array(X_valid), np.array(y_valid)
@@ -191,7 +191,7 @@ X_test = []
 
 for i in range(days_intake_length, len(inputs)-forecast_day):
     X_test.append(inputs[i-60:i, 0])
-    y_test.append(inputs[i+forecast_day,0])
+    y_test.append(inputs[i:i+forecast_day,0])
 
 X_test, y_test = np.array(X_test), np.array(y_test)
 
@@ -204,15 +204,16 @@ y_test = sc.inverse_transform(y_test.reshape(-1,1))
 
 #See your results!
 
+#TODO, create a function for the time shifted array of forecasts
+
 import matplotlib.pyplot as plt
 
 #Plotting the validation predicted values
-#THE TIME NEEDS FIXING
-y_pred_valid_xr = xr.DataArray(y_pred_valid.reshape(-1), dims=('time'), coords={'time': dataset_valid.time.values[:-10]})
+y_pred_valid_xr = xr.DataArray(y_pred_valid.reshape(-1), dims=('time'), coords={'time': dataset_valid.time.values})
 y_pred_valid_xr.plot(label="Predicted discharge", figsize=(15,5))
 
 #Plotting the real validation values
-y_valid_xr = xr.DataArray(y_valid.reshape(-1), dims=('time'), coords={'time': dataset_valid.time.values[:-10]})
+y_valid_xr = xr.DataArray(y_valid.reshape(-1), dims=('time'), coords={'time': dataset_valid.time.values})
 y_valid_xr.plot(label='True discharge')
 plt.title('LSTM model prediction trained on time values from 1981-2005')
 plt.legend(loc="upper left")
@@ -223,11 +224,11 @@ plt.savefig('./images/sampleanalysis/LSTM_discharge_validationdata.png', dpi=600
 
 #Plotting the test predicated values
 
-y_pred_test_xr = xr.DataArray(y_pred_test.reshape(-1), dims=('time'), coords={'time': dataset_test.time.values[:-10]})
+y_pred_test_xr = xr.DataArray(y_pred_test.reshape(-1), dims=('time'), coords={'time': dataset_test.time.values})
 y_pred_test_xr.plot(label="Predicted discharge", figsize=(15,5))
 
 #Plotting the real test values
-y_test_xr = xr.DataArray(y_test.reshape(-1), dims=('time'), coords={'time': dataset_test.time.values[:-10]})
+y_test_xr = xr.DataArray(y_test.reshape(-1), dims=('time'), coords={'time': dataset_test.time.values})
 y_test_xr.plot(label="True discharge")
 plt.title('LSTM model prediction trained on time values from 1981-2005')
 plt.legend(loc='upper left')
