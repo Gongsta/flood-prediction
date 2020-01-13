@@ -1,3 +1,4 @@
+#TODO: TRAIN THE MODEL ON THE CLOUD
 #This 3rd version of the LSTM incorporates the many other variables such as precipitation into the model
 
 import sys
@@ -93,16 +94,16 @@ from functions.floodmodel_utils import add_time
 regressor = Sequential()
 
 #input_shape is (time_steps, input units)
-regressor.add(LSTM(units=50, return_sequences= True, input_shape=(X_train.shape[1], X_train.shape[2])))
+regressor.add(LSTM(units=800, return_sequences= True, input_shape=(X_train.shape[1], X_train.shape[2])))
 regressor.add(Dropout(0.1))
 
-regressor.add(LSTM(units=50, return_sequences= True))
+regressor.add(LSTM(units=800, return_sequences= True))
 regressor.add(Dropout(0.1))
 
-regressor.add(LSTM(units=50, return_sequences= True))
+regressor.add(LSTM(units=800, return_sequences= True))
 regressor.add(Dropout(0.1))
 
-regressor.add(LSTM(units=50))
+regressor.add(LSTM(units=800))
 regressor.add(Dropout(0.1))
 
 regressor.add(Dense(units=1))

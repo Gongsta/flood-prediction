@@ -28,7 +28,7 @@ config:
           scale: 1.0
           seed: null
       kernel_regularizer: null
-      name: lstm_1
+      name: lstm_5
       recurrent_activation: sigmoid
       recurrent_constraint: null
       recurrent_dropout: 0.0
@@ -49,7 +49,7 @@ config:
   - class_name: Dropout
     config:
       dtype: float32
-      name: dropout_1
+      name: dropout_5
       noise_shape: null
       rate: 0.1
       seed: null
@@ -76,7 +76,7 @@ config:
           scale: 1.0
           seed: null
       kernel_regularizer: null
-      name: lstm_2
+      name: lstm_6
       recurrent_activation: sigmoid
       recurrent_constraint: null
       recurrent_dropout: 0.0
@@ -97,7 +97,7 @@ config:
   - class_name: Dropout
     config:
       dtype: float32
-      name: dropout_2
+      name: dropout_6
       noise_shape: null
       rate: 0.1
       seed: null
@@ -124,7 +124,7 @@ config:
           scale: 1.0
           seed: null
       kernel_regularizer: null
-      name: lstm_3
+      name: lstm_7
       recurrent_activation: sigmoid
       recurrent_constraint: null
       recurrent_dropout: 0.0
@@ -145,7 +145,7 @@ config:
   - class_name: Dropout
     config:
       dtype: float32
-      name: dropout_3
+      name: dropout_7
       noise_shape: null
       rate: 0.1
       seed: null
@@ -172,7 +172,7 @@ config:
           scale: 1.0
           seed: null
       kernel_regularizer: null
-      name: lstm_4
+      name: lstm_8
       recurrent_activation: sigmoid
       recurrent_constraint: null
       recurrent_dropout: 0.0
@@ -193,7 +193,7 @@ config:
   - class_name: Dropout
     config:
       dtype: float32
-      name: dropout_4
+      name: dropout_8
       noise_shape: null
       rate: 0.1
       seed: null
@@ -217,9 +217,9 @@ config:
           scale: 1.0
           seed: null
       kernel_regularizer: null
-      name: dense_1
+      name: dense_2
       trainable: true
       units: 1
       use_bias: true
-  name: sequential_1
+  name: sequential_2
 keras_version: 2.3.1

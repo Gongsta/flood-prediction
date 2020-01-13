@@ -2,9 +2,43 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e15b811c-8d99-4f22-9516-0891d521f49b" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/cases/sample_analysis_LSTM_ver5.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/coastal/apirequest.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/coastal/datapreprocessing.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/coastal/eo-learn.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cases/elbe_analysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/cases/elbe_analysis.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cases/sample_analysis_LSTM_ver2.py" beforeDir="false" afterPath="$PROJECT_DIR$/cases/sample_analysis_LSTM_ver2.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cases/sample_analysis_LSTM_ver4.py" beforeDir="false" afterPath="$PROJECT_DIR$/cases/sample_analysis_LSTM_ver4.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cases/sample_analysis_LSTM_ver5.py" beforeDir="false" afterPath="$PROJECT_DIR$/cases/sample_analysis_LSTM_ver5.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cases/sample_anaylsis_LSTM_ver3.py" beforeDir="false" afterPath="$PROJECT_DIR$/cases/sample_anaylsis_LSTM_ver3.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-11sgyomd.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-22ls74xn.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-5ow89zlm.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-5vm5kg0q.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-63j2j68n.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-6hpt0kjv.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-94jjype6.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-b9903y81.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-d60muden.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-hqsh1845.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-l51ok97z.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-l9gnhymf.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-on47n3sd.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-ozp90p13.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-p4y3nbcb.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-ugl75f56.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-viyesavq.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-w0vlgme8.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-w45aajsu.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-wun9569_.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-wya4igk8.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-y5ng3fmk.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-ycgg89e8.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dask-worker-space/worker-zeidintn.dirlock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/environment.yml" beforeDir="false" afterPath="$PROJECT_DIR$/environment.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/sampleanalysis/LSTM_discharge_testdata.png" beforeDir="false" afterPath="$PROJECT_DIR$/images/sampleanalysis/LSTM_discharge_testdata.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/sample-analysis/LSTM4.h5" beforeDir="false" afterPath="$PROJECT_DIR$/models/sample-analysis/LSTM4.h5" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/sample-analysis/LSTM4.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/models/sample-analysis/LSTM4.yaml" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -17,69 +51,45 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/cases/elbe_analysis.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1920">
-              <caret line="243" selection-start-line="243" selection-end-line="258" selection-end-column="22" />
+            <state relative-caret-position="535">
+              <caret line="46" column="67" selection-start-line="46" selection-start-column="67" selection-end-line="46" selection-end-column="67" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file:///opt/miniconda3/envs/flood_prediction/lib/python3.7/site-packages/xarray/plot/plot.py">
+        <entry file="file://$PROJECT_DIR$/coastal/apirequest.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-475">
-              <caret line="452" column="6" selection-start-line="452" selection-start-column="6" selection-end-line="452" selection-end-column="6" />
+            <state relative-caret-position="240">
+              <caret line="15" column="22" selection-start-line="15" selection-start-column="22" selection-end-line="15" selection-end-column="22" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/cases/sample_analysis_LSTM_ver2.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-3070">
-              <caret line="7" column="18" selection-end-line="383" />
-            </state>
-          </provider>
+        <entry file="file://$PROJECT_DIR$/coastal/datapreprocessing.py">
+          <provider selected="true" editor-type-id="text-editor" />
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/cases/sample_analysis_LSTM_ver4.py">
+        <entry file="file://$PROJECT_DIR$/environment.yml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2462">
-              <caret line="225" selection-start-line="225" selection-end-line="232" selection-end-column="28" />
+            <state relative-caret-position="510">
+              <caret line="73" column="12" selection-start-line="73" selection-start-column="12" selection-end-line="73" selection-end-column="12" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/cases/sample_analysis_LSTM_ver5.py">
+        <entry file="file://$PROJECT_DIR$/coastal/eo-learn.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="171">
-              <caret line="202" lean-forward="true" selection-start-line="154" selection-end-line="202" />
+            <state relative-caret-position="1728">
+              <caret line="108" lean-forward="true" selection-end-line="191" selection-end-column="30" />
+              <folding>
+                <element signature="e#0#81#0" expanded="true" />
+              </folding>
             </state>
           </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/cases/sample_analysis_LSTM.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="80">
-              <caret line="5" column="19" selection-start-line="5" selection-start-column="19" selection-end-line="5" selection-end-column="19" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/cases/sample_anaylsis_LSTM_ver3.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="394">
-              <caret line="129" column="61" selection-start-line="129" selection-start-column="61" selection-end-line="129" selection-end-column="61" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/images/sampleanalysis/LSTM_discharge_validationdata.png">
-          <provider selected="true" editor-type-id="images" />
         </entry>
       </file>
     </leaf>
@@ -155,21 +165,24 @@
         <option value="$PROJECT_DIR$/missing_file_verifier.py" />
         <option value="$PROJECT_DIR$/glofasdataextraction.py" />
         <option value="$PROJECT_DIR$/README.md" />
-        <option value="$PROJECT_DIR$/environment.yml" />
         <option value="$PROJECT_DIR$/cases/bangladesh_with_plots.py" />
         <option value="$PROJECT_DIR$/cases/bangladesh.py" />
         <option value="$PROJECT_DIR$/cases/elbe_analysis_with_coordinates.py" />
         <option value="$PROJECT_DIR$/convert_to_zarr.py" />
         <option value="$PROJECT_DIR$/functions/floodmodel_utils.py" />
         <option value="$PROJECT_DIR$/cases/sample_analysis.py" />
-        <option value="$PROJECT_DIR$/cases/elbe_analysis.py" />
         <option value="$PROJECT_DIR$/cases/elbe_analysis_with_plots.py" />
         <option value="$PROJECT_DIR$/cases/sample_analysis_LSTM_ver-1.py" />
         <option value="$PROJECT_DIR$/cases/sample_analysis_LSTM.py" />
-        <option value="$PROJECT_DIR$/cases/sample_analysis_LSTM_ver2.py" />
-        <option value="$PROJECT_DIR$/cases/sample_anaylsis_LSTM_ver3.py" />
         <option value="$PROJECT_DIR$/cases/sample_analysis_LSTM_ver4.py" />
+        <option value="$PROJECT_DIR$/cases/sample_analysis_LSTM_ver2.py" />
         <option value="$PROJECT_DIR$/cases/sample_analysis_LSTM_ver5.py" />
+        <option value="$PROJECT_DIR$/cases/elbe_analysis.py" />
+        <option value="$PROJECT_DIR$/cases/sample_anaylsis_LSTM_ver3.py" />
+        <option value="$PROJECT_DIR$/coastal/apirequest.py" />
+        <option value="$PROJECT_DIR$/coastal/datapreprocessing.py" />
+        <option value="$PROJECT_DIR$/environment.yml" />
+        <option value="$PROJECT_DIR$/coastal/eo-learn.py" />
       </list>
     </option>
   </component>
@@ -195,35 +208,7 @@
             <path>
               <item name="flood-prediction" type="b2602c69:ProjectViewProjectNode" />
               <item name="flood-prediction" type="462c0819:PsiDirectoryNode" />
-              <item name="cases" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="flood-prediction" type="b2602c69:ProjectViewProjectNode" />
-              <item name="flood-prediction" type="462c0819:PsiDirectoryNode" />
-              <item name="images" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="flood-prediction" type="b2602c69:ProjectViewProjectNode" />
-              <item name="flood-prediction" type="462c0819:PsiDirectoryNode" />
-              <item name="images" type="462c0819:PsiDirectoryNode" />
-              <item name="Bangladesh" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="flood-prediction" type="b2602c69:ProjectViewProjectNode" />
-              <item name="flood-prediction" type="462c0819:PsiDirectoryNode" />
-              <item name="images" type="462c0819:PsiDirectoryNode" />
-              <item name="Elbe" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="flood-prediction" type="b2602c69:ProjectViewProjectNode" />
-              <item name="flood-prediction" type="462c0819:PsiDirectoryNode" />
-              <item name="images" type="462c0819:PsiDirectoryNode" />
-              <item name="sampleanalysis" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="flood-prediction" type="b2602c69:ProjectViewProjectNode" />
-              <item name="flood-prediction" type="462c0819:PsiDirectoryNode" />
-              <item name="models" type="462c0819:PsiDirectoryNode" />
+              <item name="coastal" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -241,6 +226,7 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/coastal" />
       <recent name="$PROJECT_DIR$/images" />
       <recent name="$PROJECT_DIR$/cases" />
       <recent name="$PROJECT_DIR$/functions" />
@@ -273,6 +259,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1440" height="900" extended-state="0" />
+    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.24242425" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -287,7 +274,7 @@
       <window_info anchor="bottom" id="Version Control" order="7" weight="0.32871288" />
       <window_info anchor="bottom" id="Terminal" order="8" sideWeight="0.49964765" weight="0.31445783" />
       <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.5003524" side_tool="true" weight="0.33373493" />
-      <window_info active="true" anchor="bottom" id="Python Console" order="10" sideWeight="0.49964765" visible="true" weight="0.23734939" />
+      <window_info active="true" anchor="bottom" id="Python Console" order="10" sideWeight="0.49964765" visible="true" weight="0.21566264" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -313,65 +300,6 @@
     </layout-to-restore>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/glofasdataextraction.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="559">
-          <caret line="36" column="16" selection-start-line="36" selection-start-column="16" selection-end-line="36" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/missing_file_verifier.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="144">
-          <caret line="9" selection-start-line="9" selection-end-line="31" selection-end-column="56" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/functions/floodmodels.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="352">
-          <caret line="22" column="12" selection-start-line="22" selection-start-column="12" selection-end-line="22" selection-end-column="12" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/functions/data_download.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/README.md">
-      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
-        <state split_layout="SPLIT">
-          <first_editor relative-caret-position="32">
-            <caret line="2" column="140" selection-start-line="2" selection-start-column="140" selection-end-line="2" selection-end-column="140" />
-          </first_editor>
-          <second_editor />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/functions/other.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="5296">
-          <caret line="338" selection-start-line="338" selection-end-line="338" />
-          <folding>
-            <element signature="e#72#87#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/environment.yml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="433">
-          <caret line="68" column="9" selection-start-line="68" selection-start-column="9" selection-end-line="68" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/images/Elbe/1999_glofas_Elbe_map.png" />
-    <entry file="file://$PROJECT_DIR$/images/Elbe/Elbe_map.png" />
     <entry file="file://$PROJECT_DIR$/images/Elbe/era5_Elbe_map.png" />
     <entry file="file://$PROJECT_DIR$/images/Elbe/mean_discharge_map.png" />
     <entry file="file://$PROJECT_DIR$/images/Elbe/dischargevisualization.png" />
@@ -449,16 +377,6 @@
     <entry file="file://$PROJECT_DIR$/images/test/multif_prediction.png">
       <provider selected="true" editor-type-id="images" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/functions/floodmodel_utils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-371">
-          <caret line="159" column="4" selection-start-line="159" selection-start-column="4" selection-end-line="159" selection-end-column="4" />
-          <folding>
-            <element signature="e#119#134#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///opt/miniconda3/envs/flood_prediction/lib/python3.7/site-packages/keras/layers/recurrent.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="846">
@@ -489,13 +407,6 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/images/Elbe/distribution_of_dis.png">
       <provider selected="true" editor-type-id="images" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/cases/sample_analysis_LSTM_ver-1.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2608">
-          <caret line="163" selection-start-line="163" selection-end-line="163" />
-        </state>
-      </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/images/sampleanalysis/LSTM_difference_of_discharge_validationdata.png">
       <provider selected="true" editor-type-id="images" />
@@ -547,13 +458,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/cases/sample_anaylsis_LSTM_ver3.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="394">
-          <caret line="129" column="61" selection-start-line="129" selection-start-column="61" selection-end-line="129" selection-end-column="61" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/cases/sample_analysis_LSTM.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="80">
@@ -568,31 +472,105 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/cases/elbe_analysis.py">
+    <entry file="file://$PROJECT_DIR$/cases/sample_analysis_LSTM_ver-1.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1920">
-          <caret line="243" selection-start-line="243" selection-end-line="258" selection-end-column="22" />
+        <state relative-caret-position="2608">
+          <caret line="163" selection-start-line="163" selection-end-line="163" />
         </state>
       </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/images/sampleanalysis/LSTM_ver5_discharge_validationdata.png">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/images/sampleanalysis/LSTM_ver5_discharge_testdata.png">
+      <provider selected="true" editor-type-id="images" />
     </entry>
     <entry file="file://$PROJECT_DIR$/cases/sample_analysis_LSTM_ver2.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-3070">
-          <caret line="7" column="18" selection-end-line="383" />
+        <state relative-caret-position="2488">
+          <caret line="228" column="23" selection-start-line="228" selection-start-column="23" selection-end-line="228" selection-end-column="23" />
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/images/sampleanalysis/LSTM_ver5_14thday_discharge_testdata.png">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
     <entry file="file://$PROJECT_DIR$/cases/sample_analysis_LSTM_ver4.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2462">
-          <caret line="225" selection-start-line="225" selection-end-line="232" selection-end-column="28" />
+        <state relative-caret-position="500">
+          <caret line="234" column="60" selection-start-line="234" selection-end-line="235" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/cases/sample_analysis_LSTM_ver5.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="171">
-          <caret line="202" lean-forward="true" selection-start-line="154" selection-end-line="202" />
+        <state relative-caret-position="410">
+          <caret line="268" column="51" selection-start-line="268" selection-end-line="269" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cases/sample_anaylsis_LSTM_ver3.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="35" selection-start-column="35" selection-end-column="35" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/functions/floodmodel_utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="560">
+          <caret line="275" column="4" selection-start-line="275" selection-start-column="4" selection-end-line="275" selection-end-column="4" />
+          <folding>
+            <element signature="e#119#134#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///opt/miniconda3/envs/flood_prediction/lib/python3.7/site-packages/gcsfs/mapping.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="48">
+          <caret line="3" column="17" selection-start-line="3" selection-start-column="17" selection-end-line="3" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///opt/miniconda3/envs/flood_prediction/lib/python3.7/site-packages/gcsfs/core.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4256">
+          <caret line="296" column="8" selection-start-line="296" selection-start-column="8" selection-end-line="296" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cases/elbe_analysis.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="535">
+          <caret line="46" column="67" selection-start-line="46" selection-start-column="67" selection-end-line="46" selection-end-column="67" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coastal/apirequest.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="240">
+          <caret line="15" column="22" selection-start-line="15" selection-start-column="22" selection-end-line="15" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coastal/datapreprocessing.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/environment.yml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="510">
+          <caret line="73" column="12" selection-start-line="73" selection-start-column="12" selection-end-line="73" selection-end-column="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coastal/eo-learn.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1728">
+          <caret line="108" lean-forward="true" selection-end-line="191" selection-end-column="30" />
+          <folding>
+            <element signature="e#0#81#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

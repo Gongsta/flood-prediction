@@ -69,3 +69,6 @@ dependencies:
   - pyshp
   - pydot
   - zarr
+  - flask
+  - earthengine-api
+  - eo-learn

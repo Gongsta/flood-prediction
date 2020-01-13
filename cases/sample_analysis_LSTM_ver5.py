@@ -165,7 +165,7 @@ inputs = sc.transform(inputs)
 y_valid = []
 X_valid = []
 
-for i in range(days_intake_length, len(inputs)-forecast_day):
+for i in range(days_intake_length, len(inputs)-forecast_day+1):
     X_valid.append(inputs[i-days_intake_length:i, 0])
     y_valid.append(inputs[i:i+forecast_day, 0])
 
@@ -177,8 +177,9 @@ X_valid = np.reshape(X_valid, (X_valid.shape[0], X_valid.shape[1], 1))
 
 y_pred_valid = regressor.predict(X_valid)
 y_pred_valid = sc.inverse_transform(y_pred_valid)
-y_valid = sc.inverse_transform(y_valid.reshape(-1,1))
+y_valid = sc.inverse_transform(y_valid)
 
+#TODO: There's a missing data point in the forecast range
 
 #Making the predictions on the test set (where there was a flood event)
 dataset_total_2 = np.concatenate((dataset_valid, dataset_test))
@@ -189,7 +190,7 @@ inputs = sc.transform(inputs)
 y_test = []
 X_test = []
 
-for i in range(days_intake_length, len(inputs)-forecast_day):
+for i in range(days_intake_length, len(inputs)-forecast_day+1):
     X_test.append(inputs[i-60:i, 0])
     y_test.append(inputs[i:i+forecast_day,0])
 
@@ -206,36 +207,66 @@ y_test = sc.inverse_transform(y_test.reshape(-1,1))
 
 #TODO, create a function for the time shifted array of forecasts
 
+#NOTE: In this lSTM model, the plots will look different from the other plots. This is because the model returns an array of
+#forecasts rather than a single value. THe LSTM model is trained not only on predicting a single day, but multiple days.
+
 import matplotlib.pyplot as plt
 
-#Plotting the validation predicted values
-y_pred_valid_xr = xr.DataArray(y_pred_valid.reshape(-1), dims=('time'), coords={'time': dataset_valid.time.values})
-y_pred_valid_xr.plot(label="Predicted discharge", figsize=(15,5))
+for i in range(0, len(y_valid), 14):
+    plt.plot(y_pred_valid[i])
+
+import matplotlib.pyplot as plt
 
 #Plotting the real validation values
-y_valid_xr = xr.DataArray(y_valid.reshape(-1), dims=('time'), coords={'time': dataset_valid.time.values})
-y_valid_xr.plot(label='True discharge')
-plt.title('LSTM model prediction trained on time values from 1981-2005')
+dataset_valid.plot(label='True discharge', figsize=(15,5))
+
+#Plotting the validation predicted values
+for i in range(0, len(y_pred_valid), forecast_day):
+    y_pred_valid_xr = xr.DataArray(y_pred_valid[i], dims=('time'), coords={'time': dataset_valid.time.values[i:i+forecast_day]})
+    y_pred_valid_xr.plot()
+
+
+plt.title('LSTM model 14-day forecasts with 60-day timesteps')
 plt.legend(loc="upper left")
-plt.savefig('./images/sampleanalysis/LSTM_discharge_validationdata.png', dpi=600)
+plt.savefig('./images/sampleanalysis/LSTM_ver5_discharge_validationdata.png', dpi=600)
 
-
-
-
-#Plotting the test predicated values
-
-y_pred_test_xr = xr.DataArray(y_pred_test.reshape(-1), dims=('time'), coords={'time': dataset_test.time.values})
-y_pred_test_xr.plot(label="Predicted discharge", figsize=(15,5))
 
 #Plotting the real test values
-y_test_xr = xr.DataArray(y_test.reshape(-1), dims=('time'), coords={'time': dataset_test.time.values})
-y_test_xr.plot(label="True discharge")
-plt.title('LSTM model prediction trained on time values from 1981-2005')
+#This line of code is useless, you can just call dataset_test.plot()
+#y_test_xr = xr.DataArray(y_test.reshape(-1), dims=('time'), coords={'time': dataset_test.time.values[forecast_day:]})
+dataset_test.plot(label="True discharge", figsize=(15,5))
+#Plotting the test predicated values
+
+for i in range(0, len(y_pred_test), forecast_day):
+    y_pred_test_xr = xr.DataArray(y_pred_test[i], dims=('time'), coords={'time': dataset_test.time.values[i:i+forecast_day]})
+    y_pred_test_xr.plot()
+
+
+plt.title('LSTM model 14-day forecasts with 60-day timesteps')
 plt.legend(loc='upper left')
-plt.savefig('./images/sampleanalysis/LSTM_discharge_testdata.png', dpi=600)
+plt.savefig('./images/sampleanalysis/LSTM_ver5_discharge_testdata.png', dpi=600)
 
 
 
+
+
+#Plotting the forecast of the 14th day of the test set
+dataset_test.plot(label="True discharge", figsize=(15,5))
+#Plotting the test predicated values
+
+forecast_predictions = []
+for i in range(len(y_pred_test)):
+    forecast_predictions.append(y_pred_test[i][13])
+
+forecast_predictions = np.array(forecast_predictions)
+
+forecast_predictions_xr = xr.DataArray(forecast_predictions, dims=('time'), coords={'time': dataset_test.time.values[13:]})
+forecast_predictions_xr.plot(label="14th day predicted discharge")
+
+
+plt.title('LSTM model 14th-day forecasts with 60-day timesteps')
+plt.legend(loc='upper left')
+plt.savefig('./images/sampleanalysis/LSTM_ver5_14thday_discharge_testdata.png', dpi=600)
 
 
 

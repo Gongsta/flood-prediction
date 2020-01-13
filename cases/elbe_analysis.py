@@ -43,10 +43,13 @@ ds = xr.open_zarr(fsspec.get_mapper('gcs://weather-data-copernicus/Elbe'))
 #ds = xr.open_zarr('/Volumes/Seagate Backup Plus Drive/weatherdata/glofas')
 """
 
+import fsspec
+ds = xr.open_zarr(fsspec.get_mapper('gcs://pangeo-data/mydataset'))
+
 import gcsfs
 from gcsfs import GCSFileSystem
 fs = GCSFileSystem(project="flood-prediction-263210", token='cache')
-gcsmapglofas = gcsfs.mapping.GCSMap('weather-data-copernicus/glofas', gcs=fs, check=True, create=False)
+gcsmapglofas = gcsfs.mapping.GCSMap('weather-data-copernicus/glofas/', gcs=fs, check=True, create=False)
 glofas_loaded = xr.open_zarr(gcsmapglofas)
 gcsmapElbe = gcsfs.mapping.GCSMap('weather-data-copernicus/Elbe', gcs=fs, check=True, create=False)
 era5_loaded = xr.open_zarr(gcsmapElbe)
@@ -61,7 +64,7 @@ glofas = glofas_loaded.copy()
 era5 = era5_loaded.copy()
 
 #WHICH ONE TO USE? client.persist(glofas) or glofas,persist()?
- glofas.persist()
+glofas.persist()
 era5.persist()
 #Renaming the glofas coordinates from 'lon' to 'longitude' so that it is identical with era5's coordinates, which are spelled 'longitude' and 'latitude'
 glofas = glofas.rename({'lon' : 'longitude'})

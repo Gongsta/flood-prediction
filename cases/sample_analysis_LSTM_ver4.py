@@ -159,12 +159,14 @@ dataset_total = np.concatenate((dataset_train, dataset_valid))
 
 #To test our model on the test set, we will need to use part of the training set. More specifically, since our model has been trained on the
 #60 previous days, we will need exactly 60 days out of the training set, in addition to all of the test set.
+#inputs = dataset_train[-60:] + dataset_valid
 inputs = dataset_total[len(dataset_total)-len(dataset_valid)-60:]
 inputs = inputs.reshape(-1,1)
 inputs = sc.transform(inputs)
 y_valid = []
 X_valid = []
 
+#In this loop, X_valid can actually be extended, but for now, I am substracting the forecast_day else appending to y_valid would loop out of the range of inputs
 for i in range(days_intake_length, len(inputs)-forecast_day):
     X_valid.append(inputs[i-days_intake_length:i, 0])
     y_valid.append(inputs[i+forecast_day, 0])
@@ -207,31 +209,30 @@ y_test = sc.inverse_transform(y_test.reshape(-1,1))
 import matplotlib.pyplot as plt
 
 #Plotting the validation predicted values
-#THE TIME NEEDS FIXING
-y_pred_valid_xr = xr.DataArray(y_pred_valid.reshape(-1), dims=('time'), coords={'time': dataset_valid.time.values[:-10]})
+y_pred_valid_xr = xr.DataArray(y_pred_valid.reshape(-1), dims=('time'), coords={'time': dataset_valid.time.values[forecast_day:]})
 y_pred_valid_xr.plot(label="Predicted discharge", figsize=(15,5))
 
 #Plotting the real validation values
-y_valid_xr = xr.DataArray(y_valid.reshape(-1), dims=('time'), coords={'time': dataset_valid.time.values[:-10]})
+y_valid_xr = xr.DataArray(y_valid.reshape(-1), dims=('time'), coords={'time': dataset_valid.time.values[forecast_day:]})
 y_valid_xr.plot(label='True discharge')
-plt.title('LSTM model prediction trained on time values from 1981-2005')
+plt.title('15-day LSTM model forecasts trained on time values from 1981-2005 with 60-day time-steps')
 plt.legend(loc="upper left")
-plt.savefig('./images/sampleanalysis/LSTM_discharge_validationdata.png', dpi=600)
+plt.savefig('./images/sampleanalysis/LSTM_ver4_discharge_validationdata.png', dpi=600)
 
 
 
 
 #Plotting the test predicated values
 
-y_pred_test_xr = xr.DataArray(y_pred_test.reshape(-1), dims=('time'), coords={'time': dataset_test.time.values[:-10]})
+y_pred_test_xr = xr.DataArray(y_pred_test.reshape(-1), dims=('time'), coords={'time': dataset_test.time.values[forecast_day:]})
 y_pred_test_xr.plot(label="Predicted discharge", figsize=(15,5))
 
 #Plotting the real test values
-y_test_xr = xr.DataArray(y_test.reshape(-1), dims=('time'), coords={'time': dataset_test.time.values[:-10]})
+y_test_xr = xr.DataArray(y_test.reshape(-1), dims=('time'), coords={'time': dataset_test.time.values[forecast_day:]})
 y_test_xr.plot(label="True discharge")
-plt.title('LSTM model prediction trained on time values from 1981-2005')
+plt.title('15-day LSTM model forecasts trained on time values from 1981-2005 with 60-day time-steps')
 plt.legend(loc='upper left')
-plt.savefig('./images/sampleanalysis/LSTM_discharge_testdata.png', dpi=600)
+plt.savefig('./images/sampleanalysis/LSTM_ver4_discharge_testdata.png', dpi=600)
 
 
 
