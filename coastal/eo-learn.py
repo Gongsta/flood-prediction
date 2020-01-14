@@ -40,6 +40,8 @@ from shapely.geometry import Polygon
 # sentinelhub-py package
 from sentinelhub import BBox, CRS
 
+#### Load the Polygon of nominal water extent and define a BBOX
+#The BBOX defines an area of interest and will be used to create an EOPatch.
 
 # The polygon of the dam is written in wkt format and WGS84 coordinate reference system. We are now loading this file
 with open('./data/theewaterskloof_dam_nominal.wkt', 'r') as f:
@@ -63,33 +65,41 @@ dam_bbox = BBox([minx, miny, maxx, maxy], crs=CRS.WGS84)
 dam_bbox.geometry - dam_nominal
 
 
+### Step 1: Intialize (and implement workflow specific) EOTasks
+#### Create an EOPatch and add all EO features (satellite imagery data)
+
 input_task = S2L1CWCSInput('TRUE-COLOR-S2-L1C', resx='20m', resy='20m', maxcc=0.5, instance_id=None)
 
 add_ndwi = S2L1CWCSInput('NDWI')
 
+#Burn in the nominal water extent. The VectorToRaster task expects the vectorised dataset in geopandas dataframe.
+
+#crs={'init':'epsg:4326'} has to do with the way the geodataframe is initailized in the coordinate reference system
 dam_gdf = gpd.GeoDataFrame(crs={'init':'epsg:4326'}, geometry=[dam_nominal])
 
 dam_gdf.plot()
 
 
 
-add_nominal_water = VectorToRaster(dam_gdf, (FeatureType.MASK_TIMELESS, 'NOMINAL_WATER'), values=1,
-                                   raster_shape=(FeatureType.MASK, 'IS_DATA'), raster_dtype=np.uint8)
+add_nominal_water = VectorToRaster(dam_gdf, (FeatureType.MASK_TIMELESS, 'NOMINAL_WATER'), values=1, raster_shape=(FeatureType.MASK, 'IS_DATA'), raster_dtype=np.uint8)
 
 
+
+#Run s2cloudless cloud detector and filter out scenes with cloud coverage >20%
+#To speed up the process the cloud detection is executed at lower resolution (160m). The resulting cloud probability map and binary mask are stored as CLP and CLM features in EOPatch.
 cloud_classifier = get_s2_pixel_cloud_detector(average_over=2, dilation_size=1, all_bands=False)
 
 cloud_detection = AddCloudMaskTask(cloud_classifier, 'BANDS-S2CLOUDLESS', cm_size_y='160m', cm_size_x='160m',
                                    cmask_feature='CLM', cprobs_feature='CLP', instance_id=None)
 
-
+#Define a `VALID_DATA` layer: pixel has to contain data and should be classified as clear sky by the cloud detector (`CLM` equals 0)
 def calculate_valid_data_mask(eopatch):
     return np.logical_and(eopatch.mask['IS_DATA'].astype(np.bool),
                           np.logical_not(eopatch.mask['CLM'].astype(np.bool)))
 
 add_valid_mask = AddValidDataMaskTask(predicate=calculate_valid_data_mask)
 
-
+#Calculate fraction of valid pixels per frame and store it as `SCALAR` feature
 def calculate_coverage(array):
     return 1.0 - np.count_nonzero(array) / np.size(array)
 

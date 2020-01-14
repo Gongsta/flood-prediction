@@ -4,13 +4,19 @@
 
 #I want to try 2 things: 1. Forecast a single day. The model returns a numerical value. ex: 5002
 #                        2. Forecast an array of days. THe model returns an array of predictions: [1 day forecast, 2 day forecast, 3 day forecast, 4 day forecast, etc.]. I will be doing this is version 5
+
+#This version of the model returns an array of predictions rather than a single prediction
 days_intake_length = 60
 forecast_day = 14
 #This second version directly calculates the discharge instead of the variation of discharge
 import sys
 sys.path.append('/Users/stevengong/Desktop/flood-prediction')
+
+
 from functions.floodmodel_utils import get_basin_mask, shift_and_aggregate, generate_prediction_array, reshape_scalar_predictand
 import xarray as xr
+import matplotlib.pyplot as plt
+
 
 # Creating the model
 import numpy as np
@@ -128,10 +134,24 @@ regressor.compile(optimizer='adam', loss='mean_squared_error')
 
 #regressor.fit(X_train.values, y_train.values, epochs=100, batch_size=32)
 
-regressor.fit(X_train, y_train, epochs=100, batch_size=32)
+history = regressor.fit(X_train, y_train, epochs=100, batch_size=32)
 
 
+#TODO: Save the loss function plot. Test if this works
+fig, ax = plt.subplots(figsize=(8, 4))
+ax.plot(history['loss'], label='loss')
+ax.plot(history['val_loss'], label='val_loss')
+plt.title('Learning curve')
+ax.set_ylabel('Loss')
+ax.set_xlabel('Epoch')
+plt.legend(['Training', 'Validation'])
+ax.set_yscale('log')
+plt.savefig('./images/Elbe/ElbeNNlearningcurve.png', dpi=600, bbox_inches='tight')
 
+#TODO: Save the model architecture
+from keras.utils import plot_model
+
+plot_model(regressor, to_file='./images/sample_analysis/model_architecture/LSTM5.png', show_shapes=True)
 
 
 # serialize model to YAML
@@ -179,7 +199,6 @@ y_pred_valid = regressor.predict(X_valid)
 y_pred_valid = sc.inverse_transform(y_pred_valid)
 y_valid = sc.inverse_transform(y_valid)
 
-#TODO: There's a missing data point in the forecast range
 
 #Making the predictions on the test set (where there was a flood event)
 dataset_total_2 = np.concatenate((dataset_valid, dataset_test))
@@ -210,7 +229,6 @@ y_test = sc.inverse_transform(y_test.reshape(-1,1))
 #NOTE: In this lSTM model, the plots will look different from the other plots. This is because the model returns an array of
 #forecasts rather than a single value. THe LSTM model is trained not only on predicting a single day, but multiple days.
 
-import matplotlib.pyplot as plt
 
 for i in range(0, len(y_valid), 14):
     plt.plot(y_pred_valid[i])
