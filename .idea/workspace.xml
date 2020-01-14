@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e15b811c-8d99-4f22-9516-0891d521f49b" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/alert_system/alert.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/coastal/eo-learn.py" beforeDir="false" afterPath="$PROJECT_DIR$/coastal/eo-learn.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/elbemodel.h5" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -14,11 +14,74 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/coastal/eo-learn.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="137">
-              <caret line="52" column="32" selection-start-line="52" selection-start-column="32" selection-end-line="52" selection-end-column="32" />
+            <state relative-caret-position="-102">
+              <caret line="179" lean-forward="true" selection-start-line="179" selection-end-line="179" />
+              <folding>
+                <element signature="e#10#91#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/alert_system/alert.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="282">
+              <caret line="23" column="21" lean-forward="true" selection-start-line="23" selection-start-column="21" selection-end-line="23" selection-end-column="21" />
+              <folding>
+                <element signature="e#0#14#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file:///opt/miniconda3/envs/flood_prediction/lib/python3.7/smtplib.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-301">
+              <caret line="16" column="22" lean-forward="true" selection-start-line="16" selection-start-column="22" selection-end-line="16" selection-end-column="33" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file:///opt/miniconda3/envs/flood_prediction/lib/python3.7/site-packages/eolearn/geometry/transformations.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-251">
+              <caret line="40" column="8" selection-start-line="40" selection-start-column="8" selection-end-line="40" selection-end-column="8" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file:///opt/miniconda3/envs/flood_prediction/lib/python3.7/site-packages/eolearn/core/constants.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="181">
+              <caret line="17" column="6" selection-start-line="17" selection-start-column="6" selection-end-line="17" selection-end-column="6" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file:///opt/miniconda3/envs/flood_prediction/lib/python3.7/site-packages/eolearn/io/__init__.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="64">
+              <caret line="4" lean-forward="true" selection-start-line="4" selection-end-line="4" />
+              <folding>
+                <element signature="e#50#333#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file:///opt/miniconda3/envs/flood_prediction/lib/python3.7/site-packages/eolearn/io/sentinelhub_service.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="132">
+              <caret line="261" column="34" lean-forward="true" selection-start-line="261" selection-end-line="262" />
             </state>
           </provider>
         </entry>
@@ -48,8 +111,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>poi</find>
-      <find>multi</find>
       <find>savefig</find>
       <find>elbe_map</find>
       <find>y_case</find>
@@ -78,6 +139,8 @@
       <find>predicte</find>
       <find>summar</find>
       <find>threshold_ot</find>
+      <find>s2l1</find>
+      <find>featurety</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -130,6 +193,7 @@
         <option value="$PROJECT_DIR$/cases/sample_analysis_LSTM_ver5.py" />
         <option value="$PROJECT_DIR$/coastal/coastalprediction.py" />
         <option value="$PROJECT_DIR$/coastal/eo-learn.py" />
+        <option value="$PROJECT_DIR$/alert_system/alert.py" />
       </list>
     </option>
   </component>
@@ -151,6 +215,11 @@
             <path>
               <item name="flood-prediction" type="b2602c69:ProjectViewProjectNode" />
               <item name="flood-prediction" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="flood-prediction" type="b2602c69:ProjectViewProjectNode" />
+              <item name="flood-prediction" type="462c0819:PsiDirectoryNode" />
+              <item name="alert_system" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="flood-prediction" type="b2602c69:ProjectViewProjectNode" />
@@ -247,22 +316,6 @@
     </layout-to-restore>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/images/Elbe/distribution_of_dis.png">
-      <provider selected="true" editor-type-id="images" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/images/sampleanalysis/LSTM_difference_of_discharge_validationdata.png">
-      <provider selected="true" editor-type-id="images" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/images/sampleanalysis/LSTM_difference_of_discharge_without_feature-scaling.png">
-      <provider selected="true" editor-type-id="images" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/cases/elbe_analysis_with_plots.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1020">
-          <caret line="315" column="56" lean-forward="true" selection-start-line="315" selection-start-column="56" selection-end-line="315" selection-end-column="56" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/images/sampleanalysis/LSTM_difference_of_discharge_testdata.png">
       <provider selected="true" editor-type-id="images" />
     </entry>
@@ -359,13 +412,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file:///opt/miniconda3/envs/flood_prediction/lib/python3.7/site-packages/eolearn/core/constants.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="208">
-          <caret line="17" column="6" selection-start-line="17" selection-start-column="6" selection-end-line="17" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///opt/miniconda3/envs/flood_prediction/lib/python3.7/site-packages/eolearn/core/eoworkflow.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="208">
@@ -408,13 +454,6 @@
           <folding>
             <element signature="e#0#19#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file:///opt/miniconda3/envs/flood_prediction/lib/python3.7/site-packages/eolearn/io/sentinelhub_service.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="137">
-          <caret line="259" column="19" selection-start-line="259" selection-start-column="6" selection-end-line="259" selection-end-column="19" />
         </state>
       </provider>
     </entry>
@@ -541,10 +580,61 @@
     <entry file="file:///opt/miniconda3/envs/flood_prediction/lib/python3.7/site-packages/shapely/wkt.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
+    <entry file="file:///opt/miniconda3/envs/flood_prediction/lib/python3.7/site-packages/eolearn/io/sentinelhub_service.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="132">
+          <caret line="261" column="34" lean-forward="true" selection-start-line="261" selection-end-line="262" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///opt/miniconda3/envs/flood_prediction/lib/python3.7/site-packages/eolearn/io/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="64">
+          <caret line="4" lean-forward="true" selection-start-line="4" selection-end-line="4" />
+          <folding>
+            <element signature="e#50#333#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///opt/miniconda3/envs/flood_prediction/lib/python3.7/site-packages/eolearn/core/constants.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="181">
+          <caret line="17" column="6" selection-start-line="17" selection-start-column="6" selection-end-line="17" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///opt/miniconda3/envs/flood_prediction/lib/python3.7/site-packages/eolearn/geometry/transformations.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-251">
+          <caret line="40" column="8" selection-start-line="40" selection-start-column="8" selection-end-line="40" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/coastal/eo-learn.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="137">
-          <caret line="52" column="32" selection-start-line="52" selection-start-column="32" selection-end-line="52" selection-end-column="32" />
+        <state relative-caret-position="-102">
+          <caret line="179" lean-forward="true" selection-start-line="179" selection-end-line="179" />
+          <folding>
+            <element signature="e#10#91#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///opt/miniconda3/envs/flood_prediction/lib/python3.7/smtplib.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-301">
+          <caret line="16" column="22" lean-forward="true" selection-start-line="16" selection-start-column="22" selection-end-line="16" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/alert_system/alert.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="282">
+          <caret line="23" column="21" lean-forward="true" selection-start-line="23" selection-start-column="21" selection-end-line="23" selection-end-column="21" />
+          <folding>
+            <element signature="e#0#14#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

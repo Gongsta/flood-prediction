@@ -51,7 +51,6 @@ with open('./data/theewaterskloof_dam_nominal.wkt', 'r') as f:
 dam_nominal = shapely.wkt.loads(dam_wkt)
 
 # inflate the BBOX... why again?
-#The BBOX defines an area of interest and will be used to create an EOPatch.
 inflate_bbox = 0.1
 minx, miny, maxx, maxy = dam_nominal.bounds
 
@@ -85,8 +84,7 @@ dam_gdf = gpd.GeoDataFrame(crs={'init':'epsg:4326'}, geometry=[dam_nominal])
 
 dam_gdf.plot()
 
-
-
+#TODO: FInd out about all these input parameters
 add_nominal_water = VectorToRaster(dam_gdf, (FeatureType.MASK_TIMELESS, 'NOMINAL_WATER'), values=1, raster_shape=(FeatureType.MASK, 'IS_DATA'), raster_dtype=np.uint8)
 
 
@@ -158,6 +156,9 @@ class WaterDetector(EOTask):
         # we're only interested in the water within the dam borders
         water_masks = water_masks[..., np.newaxis] * eopatch.mask_timeless['NOMINAL_WATER']
 
+        #I understand how they calculate the water levels now. They compare the two masks, one mask detecting the water, the other
+        #delimiting the perimeter. You do a single fraction. If the region is flooded i.e. the water goes out of bounds it returns
+        #a value bigger than 1.
         water_levels = np.asarray([np.count_nonzero(mask) / np.count_nonzero(eopatch.mask_timeless['NOMINAL_WATER'])
                                    for mask in water_masks])
 
