@@ -47,9 +47,11 @@ from sentinelhub import BBox, CRS
 with open('./data/theewaterskloof_dam_nominal.wkt', 'r') as f:
     dam_wkt = f.read()
 
+#Loading the wkt file with shapely
 dam_nominal = shapely.wkt.loads(dam_wkt)
 
-# inflate the BBOX
+# inflate the BBOX... why again?
+#The BBOX defines an area of interest and will be used to create an EOPatch.
 inflate_bbox = 0.1
 minx, miny, maxx, maxy = dam_nominal.bounds
 
@@ -68,9 +70,13 @@ dam_bbox.geometry - dam_nominal
 ### Step 1: Intialize (and implement workflow specific) EOTasks
 #### Create an EOPatch and add all EO features (satellite imagery data)
 
+#S2L1CWSCSInput is a Task for creating EOPatches and filling them with Sentinel-2 L1C data using Sentinel Hub's WCS request.
 input_task = S2L1CWCSInput('TRUE-COLOR-S2-L1C', resx='20m', resy='20m', maxcc=0.5, instance_id=None)
 
+#As you can see, we are adding two types of satellite images. HOwever, one has much more input parameters.
+#TODO: Find out why this is the case
 add_ndwi = S2L1CWCSInput('NDWI')
+
 
 #Burn in the nominal water extent. The VectorToRaster task expects the vectorised dataset in geopandas dataframe.
 
@@ -133,6 +139,8 @@ remove_cloudy_scenes = SimpleFilterTask((FeatureType.MASK, 'VALID_DATA'), ValidD
 
 class WaterDetector(EOTask):
 
+    #What does this do? Returns Upper threshold value. All pixels with an intensity higher than
+       # this value are assumed to be foreground.
     @staticmethod
     def detect_water(ndwi):
         """
