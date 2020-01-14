@@ -146,12 +146,12 @@ ax.set_ylabel('Loss')
 ax.set_xlabel('Epoch')
 plt.legend(['Training', 'Validation'])
 ax.set_yscale('log')
-plt.savefig('./images/Elbe/ElbeNNlearningcurve.png', dpi=600, bbox_inches='tight')
+plt.savefig('./images/sampleanalysis/LSTM5learningcurve.png', dpi=600, bbox_inches='tight')
 
 #TODO: Save the model architecture
 from keras.utils import plot_model
 
-plot_model(regressor, to_file='./images/sample_analysis/model_architecture/LSTM5.png', show_shapes=True)
+plot_model(regressor, to_file='./images/sampleanalysis/model_architecture/LSTM5.png', show_shapes=True)
 
 
 # serialize model to YAML
