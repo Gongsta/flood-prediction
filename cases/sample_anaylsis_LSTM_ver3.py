@@ -1,4 +1,5 @@
 #TODO: TRAIN THE MODEL ON THE CLOUD
+
 #This 3rd version of the LSTM incorporates the many other variables such as precipitation into the model
 
 import sys
@@ -7,16 +8,25 @@ from functions.floodmodel_utils import reshape_scalar_predictand
 import xarray as xr
 from dask.distributed import Client, LocalCluster
 
-cluster = LocalCluster()  # n_workers=10, threads_per_worker=1,
-client = Client()
+#Connecting to a local cluster
+# cluster = LocalCluster()  # n_workers=10, threads_per_worker=1,
+# client = Client()
+
+#Connecting to an online cluster
+client = Client("tcp://169.45.50.121:8786")  # memory_limit='16GB',
+
 print(client.scheduler_info()['services'])
 
-#Connecting my client to the cluster does not work :((
-#client = Client("tcp://192.168.0.112:8786")  # memory_limit='16GB',
 
-#Loading our data
-ds = xr.open_dataset('../data/features_xy.nc')
+# #Loading our data locally
+# ds = xr.open_dataset('../data/features_xy.nc')
 
+#Loading our data on the cloud
+import gcsfs
+from gcsfs import GCSFileSystem
+fs = GCSFileSystem(project="flood-prediction-263210", token='cache')
+gcsmapds = gcsfs.mapping.GCSMap('weather-data-copernicus/sample_dataset', gcs=fs, check=True, create=False)
+ds = xr.open_zarr(gcsmapds)
 
 y_orig = ds['dis']
 y = y_orig.copy()

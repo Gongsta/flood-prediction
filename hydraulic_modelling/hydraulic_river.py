@@ -44,6 +44,23 @@ from sentinelhub import BBox, CRS
 #The BBOX defines an area of interest and will be used to create an EOPatch.
 
 # The polygon of the dam is written in wkt format and WGS84 coordinate reference system. We are now loading this file
+
+import shapefile
+shape = shapefile.Reader("../data/major_rivers/MajorRivers.shp")
+#first feature of the shapefile
+feature = shape.shapeRecords()[0]
+first = feature.shape.__geo_interface__
+print(first)
+# (GeoJSON format)
+
+# now use the shape function of Shapely
+from shapely.geometry import shape
+shp_geom = shape(first)
+print(shp_geom)
+print(type(shp_geom))
+
+
+
 with open('./data/theewaterskloof_dam_nominal.wkt', 'r') as f:
     dam_wkt = f.read()
 
@@ -82,6 +99,9 @@ add_ndwi = S2L1CWCSInput('NDWI')
 #crs={'init':'epsg:4326'} has to do with the way the geodataframe is initailized in the coordinate reference system
 dam_gdf = gpd.GeoDataFrame(crs={'init':'epsg:4326'}, geometry=[dam_nominal])
 
+test = gpd.GeoDataFrame(crs={'init':'epsg:4326'}, geometry=[shp_geom])
+
+shp_geom.plot()
 dam_gdf.plot()
 
 #TODO: FInd out about all these input parameters

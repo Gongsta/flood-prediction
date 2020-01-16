@@ -72,3 +72,4 @@ dependencies:
   - flask
   - earthengine-api
   - eo-learn
+  - nbformat

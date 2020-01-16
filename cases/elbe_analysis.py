@@ -34,22 +34,11 @@ print(client.scheduler_info()['services'])
 
 #Loading the dataset
 
-#Does not work, takes too much time to load
-"""
-#this is suggested in the pangeo documentation
-import xarray as xr
-import fsspec
-ds = xr.open_zarr(fsspec.get_mapper('gcs://weather-data-copernicus/Elbe'))
-#ds = xr.open_zarr('/Volumes/Seagate Backup Plus Drive/weatherdata/glofas')
-"""
-
-import fsspec
-ds = xr.open_zarr(fsspec.get_mapper('gcs://pangeo-data/mydataset'))
-
+#THIS WORKS for GCS
 import gcsfs
 from gcsfs import GCSFileSystem
 fs = GCSFileSystem(project="flood-prediction-263210", token='cache')
-gcsmapglofas = gcsfs.mapping.GCSMap('weather-data-copernicus/glofas/', gcs=fs, check=True, create=False)
+gcsmapglofas = gcsfs.mapping.GCSMap('weather-data-copernicus/glofas', gcs=fs, check=True, create=False)
 glofas_loaded = xr.open_zarr(gcsmapglofas)
 gcsmapElbe = gcsfs.mapping.GCSMap('weather-data-copernicus/Elbe', gcs=fs, check=True, create=False)
 era5_loaded = xr.open_zarr(gcsmapElbe)
