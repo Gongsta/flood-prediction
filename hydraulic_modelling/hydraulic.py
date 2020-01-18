@@ -43,7 +43,6 @@ from sentinelhub import BBox, CRS
 #### Load the Polygon of nominal water extent and define a BBOX
 #The BBOX defines an area of interest and will be used to create an EOPatch.
 
-# The polygon of the dam is written in wkt format and WGS84 coordinate reference system. We are now loading this file
 with open('./data/theewaterskloof_dam_nominal.wkt', 'r') as f:
     dam_wkt = f.read()
 

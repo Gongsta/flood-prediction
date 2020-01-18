@@ -201,10 +201,18 @@ ax1.set_yscale('log')
 plt.show()
 
 
+
+
+#Calculating the error
+from sklearn.metrics import mean_squared_error
+MSE= mean_squared_error(dataset_test[18:63], forecast_predictions_xr.values[5:50])
+
+#The error per data point
+RMSE = MSE**(0.5)/len(dataset_test[18:63])
+
+#TODO: Determine what metric you should be using, MSE, standard deviation, etc.
 #Plotting the  error
 fig, ax = plt.subplots(sharex=True, figsize=(15,5))
-ax.errorbar(forecast_predictions_xr.time.values[5:50], forecast_predictions_xr.values[5:50], yerr =100,fmt='-o', capsize=5)
+ax.errorbar(forecast_predictions_xr.time.values[5:50], forecast_predictions_xr.values[5:50], yerr =RMSE,fmt='-o', capsize=5)
 ax.set_title('variable, symmetric error')
 plt.show()
-
-

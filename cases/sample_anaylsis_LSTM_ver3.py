@@ -24,7 +24,7 @@ print(client.scheduler_info()['services'])
 #Loading our data on the cloud
 import gcsfs
 from gcsfs import GCSFileSystem
-fs = GCSFileSystem(project="flood-prediction-263210", token='cache')
+fs = GCSFileSystem(project="flood-prediction-263210", token='anon')
 gcsmapds = gcsfs.mapping.GCSMap('weather-data-copernicus/sample_dataset', gcs=fs, check=True, create=False)
 ds = xr.open_zarr(gcsmapds)
 
@@ -120,7 +120,7 @@ regressor.add(Dense(units=1))
 
 regressor.compile(optimizer='adam', loss='mean_squared_error')
 
-regressor.fit(X_train, y_train, epochs=100, batch_size=32)
+history = regressor.fit(X_train, y_train, epochs=100, batch_size=32)
 
 
 

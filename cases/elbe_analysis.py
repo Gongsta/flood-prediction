@@ -37,7 +37,7 @@ print(client.scheduler_info()['services'])
 #THIS WORKS for GCS
 import gcsfs
 from gcsfs import GCSFileSystem
-fs = GCSFileSystem(project="flood-prediction-263210", token='cache')
+fs = GCSFileSystem(project="flood-prediction-263210", token='anon')
 gcsmapglofas = gcsfs.mapping.GCSMap('weather-data-copernicus/glofas', gcs=fs, check=True, create=False)
 glofas_loaded = xr.open_zarr(gcsmapglofas)
 gcsmapElbe = gcsfs.mapping.GCSMap('weather-data-copernicus/Elbe', gcs=fs, check=True, create=False)
@@ -70,6 +70,8 @@ glofas = glofas.where(elbe_basin_mask, drop=True)
 #The following code would return an error:  >> era5 = era5.where(elbe_area, drop=True)
 #IN CASE YOU DON'T KNOW: #nterpolation is an estimation of a value within two known values in a sequence of values.
 #Polynomial interpolation is a method of estimating values between known data points
+
+#TODO: Interpolation is not supported yet!!
 era5 = era5.interp(latitude=glofas.latitude, longitude=glofas.longitude).where(elbe_basin_mask, drop=True)
 
 

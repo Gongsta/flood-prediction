@@ -46,7 +46,28 @@ from sentinelhub import BBox, CRS
 # The polygon of the dam is written in wkt format and WGS84 coordinate reference system. We are now loading this file
 
 import shapefile
-shape = shapefile.Reader("../data/major_rivers/MajorRivers.shp")
+shape = shapefile.Reader("../data/Lakes_and_Rivers_Shapefile/hydrography_l_rivers_v2.shp")
+
+
+import geopandas
+
+shape = geopandas.read_file("../data/Lakes_and_Rivers_Shapefile/hydrography_l_rivers_v2.shp")
+shape.query("COUNTRY == 'USA'")
+
+import shapefile
+import pygeoif
+
+shape = shapefile.Reader("../data/Lakes_and_Rivers_Shapefile/hydrography_l_rivers_v2.shp")
+g=[]
+
+for s in shape.shapes():
+    g.append(pygeoif.geometry.as_shape(s))
+
+m = pygeoif.MultiPoint(g)
+
+print m.wkt
+
+
 #first feature of the shapefile
 feature = shape.shapeRecords()[0]
 first = feature.shape.__geo_interface__
