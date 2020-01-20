@@ -9,11 +9,11 @@ import xarray as xr
 from dask.distributed import Client, LocalCluster
 
 #Connecting to a local cluster
-# cluster = LocalCluster()  # n_workers=10, threads_per_worker=1,
-# client = Client()
+cluster = LocalCluster()  # n_workers=10, threads_per_worker=1,
+client = Client()
 
 #Connecting to an online cluster
-client = Client("tcp://169.45.50.121:8786")  # memory_limit='16GB',
+#client = Client("tcp://169.45.50.121:8786")  # memory_limit='16GB',
 
 print(client.scheduler_info()['services'])
 
@@ -62,10 +62,12 @@ import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 sc = MinMaxScaler(feature_range=(0,1))
 X_train_scaled = sc.fit_transform(X_train)
-
+sc2 = MinMaxScaler(feature_range=(0,1))
+y_train_scaled = sc2.fit_transform(np.array(y_train).reshape(-1,1))
 X_train = []
 y_train_array = []
 
+#This is not computed in parallel which causes some problem
 #Iterating through each feature, shifting the time for each feature, and appending the time-shifted feature array to X_train for a total of 16 times
 for n in range(16):
     feature_array = []
@@ -73,11 +75,21 @@ for n in range(16):
     for i in range(60, len(X_train_scaled)):
         feature_array.append(X_train_scaled[i - 60:i, n])
 
+
+
+
     X_train.append(feature_array)
 
+y_feature_array = []
+
+for i in range(60, len(y_train_scaled)):
+    y_feature_array.append(y_train_scaled[i-60:i,0])
+
+X_train.append(y_feature_array)
+
 #Creating the transformed y_train array which is shifted by 60 days
-for i in range(60, len(y_train)):
-    y_train_array.append(y_train.values[i])
+for i in range(60, len(y_train_scaled)):
+    y_train_array.append(y_train_scaled[i,0])
 
 #Transforming the list into numpy arrays
 X_train, y_train = np.array(X_train), np.array(y_train_array)
