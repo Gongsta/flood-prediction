@@ -1,5 +1,5 @@
 import xarray as xr
-from functions.utils_floodmodel import get_basin_index, get_mask_of_basin, createPointList, shift_and_aggregate, select_riverpoints
+from functions.floodmodel_utils import get_basin_mask, shift_and_aggregate
 import numpy as np
 
 from dask.distributed import Client, LocalCluster
@@ -11,7 +11,7 @@ print(client)
 #The open_mfdataset function automatically combines the many .nc files, the * represents the value that varies
 era5Loaded = xr.open_mfdataset('/Volumes/Seagate Backup Plus Drive/data/Danube/reanalysis-era5-single-levels_convective_precipitation,land_sea_mask,large_scale_precipitation,runoff,slope_of_sub_gridscale_orography,soil_type,total_column_water_vapour,volumetric_soil_water_layer_1,volumetric_soil_water_layer_2_*_*.nc', combine='by_coords')
 
-glofasLoaded = xr.open_mfdataset('/Volumes/Seagate Backup Plus Drive/data/*/CEMS_ECMWF_dis24_*_glofas_v2.1.nc', combine='by_coords')
+glofasLoaded = xr.open_mfdataset("/Volumes/portableHardDisk/data/*/CEMS_ECMWF_dis24_*_glofas_v2.1.nc", combine="by_coords")
 
 era5 = era5Loaded
 glofas = glofasLoaded
@@ -26,9 +26,16 @@ glofas = glofas.rename({'lon' : 'longitude'})
 glofas = glofas.rename({'lat': 'latitude'})
 
 import matplotlib.pyplot as plt
+elbe_basin_mask = get_basin_mask(glofas['dis24'].isel(time=0), 'Danube')
+glofas = glofas.where(elbe_basin_mask, drop=True)
 
-danube_area = get_mask_of_basin(glofas['dis24'].isel(time=0), kw_basins='Danube')
-glofas = glofas.where(danube_area, drop=True)
+fig, axes = plt.subplots(figsize=(15,4), ncols=2)
+
+glofas['dis24'].isel(time=1).plot(ax=axes[0])
+glofas['dis24'].sel(time='2013-06-09').plot(ax=axes[1])
+
+plt.savefig("./images/danube/floodmapcomparison.png", dpi=600)
+
 era5 = era5.interp(latitude=glofas.latitude, longitude=glofas.longitude).where(danube_area, drop=True)
 
 era5 = era5.mean(['latitude', 'longitude'])
@@ -51,7 +58,7 @@ import seaborn as sns
 y = glofas['dis24']
 X = era5
 
-from functions.utils_floodmodel import reshape_scalar_predictand
+from functions.floodmodel_utils import reshape_scalar_predictand
 X, y = reshape_scalar_predictand(X, y)
 
 """

@@ -71,5 +71,4 @@ dependencies:
   - zarr
   - flask
   - earthengine-api
-  - eo-learn
   - nbformat
