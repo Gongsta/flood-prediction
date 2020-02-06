@@ -1,6 +1,7 @@
 #THIS TRAINS A HYDROLOGICAL MODEL LOCALLY, USING ERA5 AND GLOFAS DATA TO PREDICT GLOFAS DATA
-
-
+import sys
+sys.path.append("../")
+"""THE PROBLEM IS tHAT I HAD A CONSTANT VALUE BEING RETURNED TO ME. THE CODE IS RUNNABLE"""
 #HYPERPARAMETERS
 days_intake_length = 60
 forecast_day = 14
@@ -15,7 +16,6 @@ from dask.distributed import Client, LocalCluster
 
 
 #Connecting to a cluster to be able to run the code locally/on the cloud
-cluster = LocalCluster()  # n_workers=10, threads_per_worker=1,
 client = Client()
 #Use this line of code if you want to run the code on the cluster
 # client = Client("tcp://169.45.50.121:8786")
@@ -28,7 +28,7 @@ print(client.scheduler_info()['services'])
 #Loading our data
 
 #Loading locally
-ds = xr.open_dataset('../data/features_xy.nc')
+ds = xr.open_dataset('./features_xy.nc')
 
 
 #Loading on the cloud (Uncomment if you want to do so)

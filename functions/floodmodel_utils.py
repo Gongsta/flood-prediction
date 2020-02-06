@@ -7,7 +7,7 @@ import xarray as xr
 import geopandas
 from rasterio import features
 from affine import Affine
-from functions.utils import calc_area
+
 np.seterr(divide='ignore', invalid='ignore')
 
 
@@ -117,7 +117,7 @@ Coordinates:
         return xr.DataArray(raster, coords=coords, dims=('latitude', 'longitude'))
 
 
-    shp2 = "./basins/major_basins/Major_Basins_of_the_World.shp"
+    shp2 = "../basins/major_basins/Major_Basins_of_the_World.shp"
     basins = geopandas.read_file(shp2)
     single_basin = basins.query("NAME == '"+ basin_name +"'").reset_index(drop=True)
     shapes = [(shape, n) for n, shape in enumerate(single_basin.geometry)]
@@ -217,6 +217,69 @@ def reshape_scalar_predictand(X_dis, y):
     yda = Xyt[:, -1].drop('features')  # features was only needed in merge
     return Xda, yda
 
+
+
+
+
+def reshape(X_dis, y):
+    """Reshape, merge predictor/predictand in time, drop nans.
+
+    Parameters
+    ----------
+    X_dis : xr.Dataset
+        variables: time shifted predictors
+        coords: time, latitude, longitude
+    y : xr.DataArray
+        coords: time, latitude, longitude
+
+
+    Returns
+    -------
+    Xda : xr.DataArray
+    yda : xr.DataArray
+
+
+    Examples
+    --------
+    #Reshaping X and y
+    >> Xda, yda = reshape_scalar_predictand(X, y)
+
+
+    """
+    if isinstance(X_dis, xr.Dataset):
+        X_dis = X_dis.to_array(dim='var_dimension')
+
+    # stack -> seen as one dimension for the model
+    stack_dims = [a for a in X_dis.dims if a != 'time']  # all except time
+    X_dis = X_dis.stack(features=stack_dims)
+    Xar = X_dis.dropna('features', how='all')  # drop features that only contain NaN
+
+    # if isinstance(y, xr.Dataset):
+    #     if len(y.data_vars) > 1:
+    #         warnings.warn('Supplied `y` with more than one variable.'
+    #                       'Which is the predictand? Supply only one!')
+    #     for v in y:
+    #         y = y[v]  # use the first
+    #         break
+
+    yar = y
+    # if len(yar.dims) > 1:
+    #     raise NotImplementedError('y.dims: '+str(yar.dims) +
+    #                               ' Supply only one predictand dimension, e.g. `time`!')
+
+    # # to be sure that these dims are not in the output
+    # for coord in ['latitude', 'longitude']:
+    #     if coord in yar.coords:
+    #         yar = yar.drop(coord)
+
+    # merge times
+    yar.coords['features'] = 'predictand'
+    Xy = xr.concat([Xar, yar], dim='features')  # maybe merge instead concat?
+    Xyt = Xy.dropna('time', how='any')  # drop rows with nan values
+
+    Xda = Xyt[:, :-1]  # last column is predictand
+    yda = Xyt[:, -1].drop('features')  # features was only needed in merge
+    return Xda, yda
 
 
 

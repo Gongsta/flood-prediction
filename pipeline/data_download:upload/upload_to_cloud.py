@@ -1,9 +1,8 @@
 import xarray as xr
 #SAVING THE DATASET
-sample_dataset = xr.open_dataset('../data/features_xy.nc')
+sample_dataset = xr.open_dataset('../../features_xy.nc')
 
-
-sample_dataset.to_zarr('../data/sample_dataset', consolidated=True)
+sample_dataset['dis'].to_netcdf('/mnt/bucket/stuarts_files/sample_dataset.nc')
 
 # #Call this in console
 #gcloud auth login

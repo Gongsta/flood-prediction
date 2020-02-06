@@ -1,6 +1,7 @@
 """Here is the intuition behind this model. I will be making predictions for each pixel of my basin. The input will be a group of pixels whereas
 the output will be the prediction of the discharge value at that pixel."""
 
+"""code is not runable yet"""
 
 from functions.floodmodel_utils import get_basin_mask, get_river_mask, reshape_scalar_predictand, reshape_multiday_predictand
 import xarray as xr
@@ -10,8 +11,8 @@ from dask.distributed import Client, LocalCluster
 
 
 #HYPERPARAMETERS
-days_intake_length = 60
-forecast_day = 14
+days_intake_length = 90
+forecast_day = 30
 
 
 #LIBRARY IMPORTS
@@ -33,24 +34,15 @@ print(client.scheduler_info()['services'])
 
 
 
-# No AWS keys required
-client = boto3.client('s3', config=botocore.client.Config(signature_version=botocore.UNSIGNED))
-
-
-import boto3
-client = boto3.client('s3') #low-level functional API
-glofas = client.get_object(Bucket='flood-prediction', Key='glofas/2002/CEMS_ECMWF_dis24_20020620_glofas_v2.1.nc')
-
-
-
 #DATA PREPROCESSING
 
-glofas_loaded = xr.open_mfdataset("/Volumes/portableHardDisk/data/glofas/*/*.nc", combine="by_coords")
-era5_loaded = xr.open_mfdataset("/Volumes/portableHardDisk/data/Elbe/*.nc", combine="by_coords")
+glofas_loaded = xr.open_mfdataset("/mnt/bucket/stuarts_files/glofas/2005/*.nc", combine="by_coords")
+era5_loaded = xr.open_mfdataset("/mnt/bucket/stuarts_files/Elbe/reanalysis-era5-single-levels_convective_precipitation,land_sea_mask,large_scale_precipitation,runoff,slope_of_sub_gridscale_orography,soil_type,total_column_water_vapour,volumetric_soil_water_layer_1,volumetric_soil_water_layer_2_*.nc", combine="by_coords")
 glofas = glofas_loaded.copy()
 era5 = era5_loaded.copy()
 
 
+from netCDF4 import Dataset
 #Renaming the glofas coordinates from 'lon' to 'longitude' so that it is identical with era5's coordinates, which are spelled 'longitude' and 'latitude'
 glofas = glofas.rename({'lon' : 'longitude'})
 glofas = glofas.rename({'lat': 'latitude'})
@@ -73,7 +65,11 @@ y = y_orig.copy()
 #Era5 will be the predictor dataset
 X = era5
 
+
+#I am not sure if this command works with the lon and lat coordinates
 Xda, yda = reshape_scalar_predictand(X, y)
+
+#I want to test out this function to keep the data coordinates,
 Xda, yda = reshape_multiday_predictand(X, y)
 
 
@@ -104,22 +100,70 @@ y_train_scaled = y_train
 X_train = []
 y_train_array = []
 
+coordinate_array = []
+
+#tqdm, itertools.product.
 #Iterating through each feature, shifting the time for each feature, and appending the time-shifted feature array to X_train for a total of 16 times
 for n in range(len(X_train.data_vars)):
+
     feature_array = []
+    #For every latitude coordinate:
+    for j in range(len(X_train.latitude)):
 
-    for i in range()
+        for k in range(len(X_train.longitude)):
 
-    for i in range(60, len(X_train_scaled)):
-        feature_array.append(X_train_scaled[i - days_intake_length:i, n])
+            for l in range(60, len(X_train_scaled)):
+
+                feature_array.append(X_train.isel(latitude=j, longitude=k)[l - days_intake_length:l, n])
 
 
-    X_train.append(feature_array)
 
+
+            coordinate_array.append(feature_array)
+            feature_array = []
+
+
+
+
+    X_train.append(coordinate_array)
+
+
+y_coordinate_array = []
 y_feature_array = []
+for i in range(len(y_train.longitude)):
+    for j in range(len(y_train.latitude)):
+        y_feature_array.append(y_train.isel(latitude=i, longitude=j)[j-days_intake_length:j])
 
-for i in range(days_intake_length, len(y_train_scaled)):
-    y_feature_array.append(y_train_scaled[i-days_intake_length:i,0])
+
+
+X_train.append(y_coordinate_array)
+y_feature_array = []
+y_coordinate_array = []
+
+for j in range(len(y_train.latitude)):
+
+    for k in range(len(y_train.longitude)):
+
+        for l in range(60, len(y_train_scaled)):
+            y_feature_array.append(X_train.isel(latitude=j, longitude=k)[l - days_intake_length:l, n])
+
+        y_coordinate_array.append(feature_array)
+        y_feature_array = []
+
+
+X_train.append(y_coordinate_array)
+
+
+
+#TODO: Fix logic here
+y_train_coordinate_array = []
+y_train_array = []
+for i in range(len(y_train.longitude)):
+    for j in range(len(y_train.latitude)):
+
+
+        for k in range(days_intake_length, len(y_train_scaled)):
+            y_feature_array.append(y_train.isel(latitude=j, longitude=i)[i-days_intake_length:i,0])
 
 X_train.append(y_feature_array)
 
@@ -230,7 +274,7 @@ X_inputs = sc.transform(X_inputs)
 y_total = np.concatenate((y_train, y_valid))
 y_inputs = y_total[len(y_total)-len(y_valid)-days_intake_length:]
 
-y_inputs = sc2.transform(y_inputs.reshape(-1,1))
+#y_inputs = sc2.transform(y_inputs.reshape(-1,1))
 #Empty array in which we will append values
 X_valid = []
 y_valid_feature_array =[]
