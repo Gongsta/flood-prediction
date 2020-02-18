@@ -13,15 +13,15 @@ import tarfile
 # with open(local_filename, 'wb') as fp:
 #      ftp.retrbinary('RETR glofas2.1_areagrid_for_StevenGongEurope20200207_201306.tar', fp.write)
 
-for i in range(2013,2016):
-     for j in range(1,13):
+for i in range(2013,2014):
+     for j in range(4,7):
           if j < 10:
                j = '0' + str(j)
 
           else:
                j = str(j)
 
-          local_filename = os.path.join("/Volumes/portableHardDisk/data/", ("europeEPS" + str(i) + j +".tar"))
+          local_filename = os.path.join("/tmp/flood_prediction/pipeline/", ("europeEPS" + str(i) + j +".tar"))
           with open(local_filename, 'wb') as fp:
                ftp.retrbinary(('RETR glofas2.1_areagrid_for_StevenGongEurope20200207_' +str(i) + j +'.tar'), fp.write)
 
