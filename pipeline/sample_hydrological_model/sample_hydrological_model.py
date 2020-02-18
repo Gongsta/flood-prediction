@@ -231,7 +231,7 @@ for i in range(0, len(y_pred_test), forecast_day):
 
 plt.title('LSTM model ' + str(forecast_day) +'-day forecasts with 60-day timesteps')
 plt.legend(loc='upper left')
-plt.savefig('./images/sampleanalysis/LSTM_ver5_discharge_testdata.png', dpi=600)
+# plt.savefig('./images/sampleanalysis/LSTM_ver5_discharge_testdata.png', dpi=600)
 
 
 
@@ -251,7 +251,7 @@ forecast_predictions_xr.plot(label="14th day predicted discharge")
 
 plt.title('LSTM model '+ str(forecast_day) +'th-day forecasts with 60-day timesteps')
 plt.legend(loc='upper left')
-plt.savefig('./images/sampleanalysis/LSTM_ver5_14thday_discharge_testdata.png', dpi=600)
+# plt.savefig('./images/sampleanalysis/LSTM_ver5_14thday_discharge_testdata.png', dpi=600)
 
 
 

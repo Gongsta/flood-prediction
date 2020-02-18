@@ -36,7 +36,7 @@ print(client.scheduler_info()['services'])
 
 #DATA PREPROCESSING
 
-glofas_loaded = xr.open_mfdataset("/mnt/bucket/stuarts_files/glofas/2005/*.nc", combine="by_coords")
+glofas_loaded = xr.open_mfdataset("/mnt/bucket/stuarts_files/thresholds_glofas/*.nc", combine="by_coords")
 era5_loaded = xr.open_mfdataset("/mnt/bucket/stuarts_files/Elbe/reanalysis-era5-single-levels_convective_precipitation,land_sea_mask,large_scale_precipitation,runoff,slope_of_sub_gridscale_orography,soil_type,total_column_water_vapour,volumetric_soil_water_layer_1,volumetric_soil_water_layer_2_*.nc", combine="by_coords")
 glofas = glofas_loaded.copy()
 era5 = era5_loaded.copy()

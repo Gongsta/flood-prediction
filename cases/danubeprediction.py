@@ -41,6 +41,33 @@ era5 = era5.interp(latitude=glofas.latitude, longitude=glofas.longitude).where(d
 era5 = era5.mean(['latitude', 'longitude'])
 glofas = glofas.mean(['latitude', 'longitude'])
 
+
+
+# #Visualizing the features
+# #Converting to a dataarray
+# era5visualization = era5.to_array(dim='features').T
+# glofasvisualization = glofas.to_array(dim='features').T
+# import matplotlib.pyplot as plt
+# for f in era5visualization.features:
+#     plt.figure(figsize=(15,5))
+#     era5visualization.sel(features=f).plot(ax=plt.gca())
+#     plt.savefig('./images/'+str(f)+ 'era5'+'.png', dpi=600, bbox_inches='tight')
+#     plt.savefig('./images/danube/'+str(f)+ 'era5'+'.png', dpi=600, bbox_inches='tight')
+#
+#
+# for f in glofasvisualization.features:
+#     plt.figure(figsize=(15,5))
+#     glofasvisualization.sel(features=f).plot(ax=plt.gca())
+#     plt.savefig('./images/glofasvisualization'+str(f)+'.png', dpi=600, bbox_inches='tight')
+#     plt.savefig('./images/danube/glofasvisualization'+str(f)+'.png', dpi=600, bbox_inches='tight')
+
+
+
+
+
+
+
+
 era5['lsp-4-11'] = shift_and_aggregate(era5['lsp'], shift=4, aggregate=8)
 era5['lsp-12-25'] = shift_and_aggregate(era5['lsp'], shift=12, aggregate=14)
 era5['lsp-26-55'] = shift_and_aggregate(era5['lsp'], shift=26, aggregate=30)
