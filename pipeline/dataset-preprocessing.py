@@ -1,5 +1,5 @@
 import sys
-sys.path.append("../../")
+sys.path.append("../")
 
 from functions.floodmodel_utils import get_basin_mask, get_river_mask, reshape_scalar_predictand, reshape_multiday_predictand
 import xarray as xr
@@ -44,6 +44,8 @@ elbe_river_mask = get_river_mask(glofas['dis24'].isel(time=0))
 
 
 glofas_masked = glofas.loc[period_test].where(elbe_basin_mask, drop=True).where(elbe_river_mask, drop=True)
+
+#lofas_masked.to_netcdf('./glofas_masked_danube_2012-2016.nc')
 
 y_orig = glofas_masked
 #Making a copy because y will be transformed to represent the variation of discharge. The model will be predicting the variation of discharge, not the quantity of discharge itself
