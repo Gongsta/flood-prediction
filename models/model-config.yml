@@ -1,6 +1,0 @@
-batch_size: 50
-dropout: 0.25
-epochs: 300
-hidden_nodes: !!python/tuple
-- 64
-loss: mse
