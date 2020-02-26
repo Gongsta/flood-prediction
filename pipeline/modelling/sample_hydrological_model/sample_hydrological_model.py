@@ -7,7 +7,6 @@ forecast_day = 14
 
 
 #LIBRARY IMPORTS
-from functions.floodmodel_utils import reshape_scalar_predictand
 import xarray as xr
 import matplotlib.pyplot as plt
 import numpy as np
@@ -28,7 +27,7 @@ print(client.scheduler_info()['services'])
 #Loading our data
 
 #Loading locally
-ds = xr.open_dataset('../data/features_xy.nc')
+ds = xr.open_dataset('../../data/features_xy.nc')
 
 
 #Loading on the cloud (Uncomment if you want to do so)
@@ -129,18 +128,18 @@ plot_model(regressor, to_file='./images/sampleanalysis/model_architecture/LSTM5.
 #SAVING THE MODEL
 # serialize model to YML
 regressor_yaml = regressor.to_yaml()
-with open("./models/sample-analysis/LSTM5.yaml", "w") as yaml_file:
+with open("../../models/sample-analysis/LSTM5.yaml", "w") as yaml_file:
     yaml_file.write(regressor_yaml)
 # serialize weights to HDF5
-regressor.save_weights("./models/sample-analysis/LSTM5.h5")
+regressor.save_weights("../../models/sample-analysis/LSTM5.h5")
 #Seialize feature scaling weights
 
 
 #LATER ON...LOADING THE MODEL
-regressor_model = open('./models/sample-analysis/LSTM5.yaml', 'r').read()
+regressor_model = open('../../models/sample-analysis/LSTM5.yaml', 'r').read()
 from keras.models import model_from_yaml
 loaded_regressor = model_from_yaml(regressor_model)
-loaded_regressor.load_weights('./models/sample-analysis/LSTM5.h5')
+loaded_regressor.load_weights('../../models/sample-analysis/LSTM5.h5')
 regressor = loaded_regressor
 
 
@@ -218,7 +217,7 @@ for i in range(0, len(y_pred_valid), forecast_day):
 
 plt.title('LSTM model' + str(forecast_day) +'-day forecasts with' + str(days_intake_length)+ '-day timesteps')
 plt.legend(loc="upper left")
-plt.savefig('./images/sampleanalysis/LSTM_ver5_discharge_validationdata.png', dpi=600)
+# plt.savefig('./images/sampleanalysis/LSTM_ver5_discharge_validationdata.png', dpi=600)
 
 
 
