@@ -126,7 +126,7 @@ regressor.add(Dropout(0.1))
 regressor.add(LSTM(units=800))
 regressor.add(Dropout(0.1))
 
-regressor.add(Dense(units=1))
+regressor.add(Dense(units=30))
 
 regressor.compile(optimizer='adam', loss='mean_squared_error')
 
