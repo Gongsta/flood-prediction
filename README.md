@@ -23,9 +23,9 @@ Fighting climate change is one of the top priorities in our century. After findi
 <img src="images/charts/pipeline.png" width="1000">
 
 
-##Datasets
+## Datasets
 
-##Data Processing
+## Data Processing
 
 ## Long Short-Term Memory (LSTM)
 I experimented with the Long Short-Term Memory network (LSTM) variation of neural networks, a type of recurrent network (RNN) that is able to store information over long periods of time through dedicated memory cells but does not experience the exploding and/or vanishing gradient problems that traditional RNNs encounter, allowing them to thrive in learning long-term dependencies between input and output features and perform exceptionally well in extreme-weather event problems where the timescale is relatively long between the input and output result. They also have a demonstrated ability to model complex nonlinear feature interactions across numerous dimensions (Ogunmulu et al. 2016). All these properties become especially important in building more accurate modern forecasting models since floods are extremely complex events that are caused by a variety of factors which do not necessarily affect its water flow rate (i.e. discharge) linearly. 
