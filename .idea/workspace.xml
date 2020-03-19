@@ -2,10 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e15b811c-8d99-4f22-9516-0891d521f49b" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/images/floodai.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/charts/pipeline.png" beforeDir="false" afterPath="$PROJECT_DIR$/images/charts/pipeline.png" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -152,7 +150,7 @@
       <workItem from="1583474384888" duration="3321000" />
       <workItem from="1583877970779" duration="3090000" />
       <workItem from="1584195987652" duration="12000" />
-      <workItem from="1584641385253" duration="1087000" />
+      <workItem from="1584641385253" duration="2073000" />
     </task>
     <servers />
   </component>
