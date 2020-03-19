@@ -14,7 +14,7 @@ sys.path.append('../')
 from functions.data_download import CDS_Dataset
 
 ds = CDS_Dataset(dataset_name='reanalysis-era5-single-levels',
-                 save_to_folder='/Volumes/portableHardDisk/data/Europe'  # path to where datasets shall be stored
+                 save_to_folder='/Volumes/portableHardDisk/data/India'  # path to where datasets shall be stored
                 )
 
 # define areas of interest (a list of degrees latitude/longitude values for the northern, western, southern and eastern bounds of the area.)
@@ -34,7 +34,7 @@ request = dict(product_type='reanalysis',
                 #[N,W,S,E]
 
                #[54, 9, 48, 17]
-               area=[56, 0, 38, 34],
+               area=[35, 68, 6, 97],
                variable= ['convective_precipitation','land_sea_mask','large_scale_precipitation','runoff','slope_of_sub_gridscale_orography','soil_type','total_column_water_vapour','volumetric_soil_water_layer_1','volumetric_soil_water_layer_2']
             #    ['10m_u_component_of_wind', '10m_v_component_of_wind', '2m_dewpoint_temperature',
             # '2m_temperature', 'evaporation_from_bare_soil', 'evaporation_from_open_water_surfaces_excluding_oceans',
